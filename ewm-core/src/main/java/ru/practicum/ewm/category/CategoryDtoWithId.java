@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategorySaveDto {
+public class CategoryDtoWithId {
     private Long id;
     private String name;
 }

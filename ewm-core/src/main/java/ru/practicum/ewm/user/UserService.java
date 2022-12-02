@@ -1,6 +1,9 @@
 package ru.practicum.ewm.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.error.AlreadyExistException;
@@ -15,9 +18,12 @@ public class UserService {
 
     private final UserRepository userStorage;
 
-    public List<UserDto> getUsers() {
-        return userStorage
-                .findAll()
+    public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
+        PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<User> users = (null != ids)
+                ? userStorage.findAllByIdIn(ids, page)
+                : userStorage.findAll(page);
+        return users
                 .stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
@@ -31,12 +37,8 @@ public class UserService {
     @Transactional
     public UserDto createUser(UserDto dto) {
         User user = UserMapper.toUser(dto);
-        try {
-            User savedUser = userStorage.save(user);
-            return UserMapper.toUserDto(savedUser);
-        } catch (Exception exception) {
-            throw new AlreadyExistException("Такой email уже есть");
-        }
+        User savedUser = userStorage.save(user);
+        return UserMapper.toUserDto(savedUser);
     }
 
     @Transactional

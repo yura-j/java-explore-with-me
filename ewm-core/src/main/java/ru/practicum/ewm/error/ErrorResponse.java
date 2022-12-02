@@ -1,16 +1,19 @@
 package ru.practicum.ewm.error;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
 public class ErrorResponse {
     String error;
+    Integer status;
+    LocalDateTime datetime;
 
-    public ErrorResponse(String error) {
+    public ErrorResponse(String error, Integer status) {
         this.error = error;
+        this.status = status;
+        datetime = LocalDateTime.now();
     }
 }
