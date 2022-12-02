@@ -31,7 +31,7 @@ public class StatisticController {
 
     @PostMapping("/hit")
     public StatisticHitDto save(
-        @RequestBody StatisticHitDto dto
+            @RequestBody StatisticHitDto dto
     ) {
         log.debug("save hit {}", dto);
         return service.saveStatistic(dto);

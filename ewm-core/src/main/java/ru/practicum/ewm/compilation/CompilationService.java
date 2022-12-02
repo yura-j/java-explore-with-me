@@ -5,19 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.error.NotFoundException;
-import ru.practicum.ewm.event.Event;
 import ru.practicum.ewm.requests.Request;
 import ru.practicum.ewm.requests.RequestRepository;
-import ru.practicum.ewm.requests.RequestService;
 import ru.practicum.ewm.requests.RequestStatus;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -47,6 +43,7 @@ public class CompilationService {
                 getEventsIdsByCompilationIds(List.of(compilation.getId())));
 
         em.clear();
+
         return CompilationMapper.toDto(
                 compilationRepository
                         .findById(compilation.getId())
@@ -92,6 +89,7 @@ public class CompilationService {
     private List<Long> getEventsIdsByCompilationIds(List<Long> compilationIds) {
         List<CompilationHasEvents> eventsRecords = compilationHasEventsRepository
                 .findAllByCompilationIdIn(compilationIds);
+
         return eventsRecords
                 .stream()
                 .map(CompilationHasEvents::getEventId)
@@ -119,6 +117,7 @@ public class CompilationService {
                         .collect(Collectors.toList());
         List<Request> confirmedRequests = requestRepository.findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED,
                 getEventsIdsByCompilationIds(compilationIds));
+
         return compilations
                 .stream()
                 .map(c -> CompilationMapper.toDto(c, confirmedRequests))
@@ -129,6 +128,7 @@ public class CompilationService {
         Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(NotFoundException::new);
         List<Request> confirmedRequests = requestRepository.findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED,
                 getEventsIdsByCompilationIds(List.of(compilation.getId())));
+
         return CompilationMapper.toDto(
                 compilationRepository
                         .findById(compilation.getId())

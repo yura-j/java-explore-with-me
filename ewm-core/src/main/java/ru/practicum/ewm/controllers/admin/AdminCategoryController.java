@@ -13,7 +13,7 @@ import ru.practicum.ewm.markers.Base;
 @RequiredArgsConstructor
 @RequestMapping("/admin/categories")
 @Slf4j
-public class CategoryAdminController {
+public class AdminCategoryController {
 
     private final CategoryService categoryService;
 
@@ -22,6 +22,7 @@ public class CategoryAdminController {
             @RequestBody @Validated(Base.class) CategoryDto dto
     ) {
         log.info("Создана категория");
+
         return categoryService.create(dto);
     }
 
@@ -29,6 +30,7 @@ public class CategoryAdminController {
     public CategoryDtoWithId editCategory(
             @RequestBody CategoryDtoWithId dto) {
         log.info("Отредактирована категория");
+
         return categoryService.edit(dto);
     }
 

@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.error.AlreadyExistException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +22,7 @@ public class UserService {
         Page<User> users = (null != ids)
                 ? userStorage.findAllByIdIn(ids, page)
                 : userStorage.findAll(page);
+
         return users
                 .stream()
                 .map(UserMapper::toUserDto)
@@ -31,6 +31,7 @@ public class UserService {
 
     public UserDto getUser(Long userId) {
         User user = userStorage.findById(userId).orElseThrow();
+
         return UserMapper.toUserDto(user);
     }
 
@@ -38,6 +39,7 @@ public class UserService {
     public UserDto createUser(UserDto dto) {
         User user = UserMapper.toUser(dto);
         User savedUser = userStorage.save(user);
+
         return UserMapper.toUserDto(savedUser);
     }
 

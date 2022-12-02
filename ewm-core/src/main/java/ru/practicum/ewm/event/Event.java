@@ -3,13 +3,10 @@ package ru.practicum.ewm.event;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.compilation.Compilation;
 import ru.practicum.ewm.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Getter

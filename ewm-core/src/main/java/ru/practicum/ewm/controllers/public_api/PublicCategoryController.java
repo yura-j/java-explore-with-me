@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/categories")
 @Slf4j
-public class CategoryPublicController {
+public class PublicCategoryController {
 
     private final CategoryService categoryService;
 
@@ -26,7 +26,7 @@ public class CategoryPublicController {
 
     @GetMapping("/{categoryId}")
     public CategoryDtoWithId get(
-           @PathVariable Long categoryId
+            @PathVariable Long categoryId
     ) {
         return categoryService.findById(categoryId);
     }

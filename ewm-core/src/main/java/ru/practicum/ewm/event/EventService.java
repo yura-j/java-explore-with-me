@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.controllers.public_api.EventsPublicSearchParameters;
-import ru.practicum.ewm.controllers.admin.EventsAdminSearchParameters;
+import ru.practicum.ewm.controllers.admin.AdminEventsController;
+import ru.practicum.ewm.controllers.public_api.PublicEventsController;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.error.ValidationException;
 import ru.practicum.ewm.requests.*;
@@ -32,14 +32,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EventService {
+    public static final Integer views = 999;
     private final EventRepository eventsRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
-
     @PersistenceContext
     private final EntityManager em;
-    public static final Integer views = 999;
 
     @Transactional
     public EventOutputDto createEvent(EventCreateDto dto, Long userId) {
@@ -49,6 +48,7 @@ public class EventService {
         checkPublishData(event);
         System.out.println(event);
         Event savedEvent = eventsRepository.save(event);
+
         return EventMapper.toDto(savedEvent);
     }
 
@@ -71,12 +71,14 @@ public class EventService {
         checkPublishData(event);
 
         Event savedEvent = eventsRepository.save(event);
+
         return EventMapper.toDto(savedEvent);
     }
 
     public List<EventOutputDto> getEvents(Long userId, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Event> events = eventsRepository.findByInitiatorId(userId, page);
+
         return events
                 .stream()
                 .map(EventMapper::toDto)
@@ -90,17 +92,20 @@ public class EventService {
             throw new ValidationException("Отменить можно только событие в состоянии ожидания модерации.");
         }
         event.setState(EventState.CANCELED);
+
         return EventMapper.toDto(event);
     }
 
     public EventOutputDto getEvent(Long eventId, Long userId) {
         Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
+
         return EventMapper.toDto(event);
     }
 
     public List<RequestDto> getRequests(Long userId, Long eventId) {
         Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
         List<Request> requests = requestRepository.findAllByEventId(event.getId());
+
         return requests
                 .stream()
                 .map(RequestMapper::toDto)
@@ -129,6 +134,7 @@ public class EventService {
                     .findAllByEventIdAndStatus(eventId, RequestStatus.PENDING)
                     .forEach(r -> r.setStatus(RequestStatus.CANCELED));
         }
+
         return RequestMapper.toDto(request);
     }
 
@@ -138,6 +144,7 @@ public class EventService {
         Request request = requestRepository.findByIdAndEventId(requestId, event.getId())
                 .orElseThrow(NotFoundException::new);
         request.setStatus(RequestStatus.REJECTED);
+
         return RequestMapper.toDto(request);
     }
 
@@ -172,6 +179,7 @@ public class EventService {
         }
 
         event.setState(EventState.CANCELED);
+
         return EventMapper.toDto(event, getParticipantsSize(eventId), views);
     }
 
@@ -182,10 +190,9 @@ public class EventService {
     @Transactional
     public EventOutputDto editEventByAdmin(EventEditDto dto, Long eventId) {
         Event event = eventsRepository.findById(eventId).orElseThrow(NotFoundException::new);
-
         fillEventFromDto(event, dto);
-
         Event savedEvent = eventsRepository.save(event);
+
         return EventMapper.toDto(savedEvent);
     }
 
@@ -222,7 +229,7 @@ public class EventService {
         }
     }
 
-    public List<EventOutputDto> searchEvents(EventsAdminSearchParameters searchParams) {
+    public List<EventOutputDto> searchEvents(AdminEventsController.AdminEventsSearchParameters searchParams) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> fields = query.from(Event.class);
@@ -289,7 +296,7 @@ public class EventService {
 
     }
 
-    public List<EventOutputDto> searchPublicEvents(EventsPublicSearchParameters searchParams) {
+    public List<EventOutputDto> searchPublicEvents(PublicEventsController.PublicEventsSearchParameters searchParams) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> root = query.from(Event.class);
@@ -374,6 +381,7 @@ public class EventService {
 
     public EventOutputDto findById(Long id) {
         Event event = eventsRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(NotFoundException::new);
+
         return EventMapper.toDto(event, getParticipantsSize(id), views);
     }
 }

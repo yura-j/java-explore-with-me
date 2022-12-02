@@ -15,6 +15,7 @@ public class CompilationOutputDto {
     private Long id;
     private String title;
     private Boolean pinned;
+
     @Getter
     @Setter
     @AllArgsConstructor

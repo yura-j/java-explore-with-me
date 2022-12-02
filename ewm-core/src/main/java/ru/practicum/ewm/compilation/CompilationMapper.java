@@ -1,7 +1,5 @@
 package ru.practicum.ewm.compilation;
 
-import ru.practicum.ewm.event.Event;
-import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.requests.Request;
 import ru.practicum.ewm.user.User;
@@ -47,6 +45,7 @@ public class CompilationMapper {
                                     .build();
                         }
                 ).collect(Collectors.toList());
+
         return CompilationOutputDto
                 .builder()
                 .id(compilation.getId())

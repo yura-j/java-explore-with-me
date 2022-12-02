@@ -9,14 +9,6 @@ import lombok.*;
 @Builder
 public class EventEditDto {
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class Location {
-        private Float lon;
-        private Float lat;
-    }
-
     private Long eventId;
     private String annotation;
     private Long category;
@@ -28,4 +20,12 @@ public class EventEditDto {
     private Integer participantLimit;
     private Boolean requestModeration;
     private String title;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class Location {
+        private Float lon;
+        private Float lat;
+    }
 }

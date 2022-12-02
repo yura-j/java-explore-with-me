@@ -20,6 +20,7 @@ public class CategoryService {
                 .name(dto.getName())
                 .build();
         Category savedCategory = categoryRepository.save(category);
+
         return CategoryDtoWithId.builder()
                 .id(savedCategory.getId())
                 .name(savedCategory.getName())
@@ -34,12 +35,14 @@ public class CategoryService {
         Category category = categoryRepository.findById(dto.getId()).orElseThrow(NotFoundException::new);
         category.setName(dto.getName());
         Category savedCategory = categoryRepository.save(category);
+
         return CategoryDtoMapper.fromCategory(savedCategory);
     }
 
     public List<CategoryDtoWithId> find(Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Category> categories = categoryRepository.findAll(page);
+
         return categories
                 .stream()
                 .map(CategoryDtoMapper::fromCategory)
@@ -48,6 +51,7 @@ public class CategoryService {
 
     public CategoryDtoWithId findById(Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(NotFoundException::new);
+
         return CategoryDtoMapper.fromCategory(category);
     }
 }

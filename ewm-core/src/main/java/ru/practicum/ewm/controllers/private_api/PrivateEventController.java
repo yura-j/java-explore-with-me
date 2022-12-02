@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
 @Slf4j
-public class EventPrivateController {
+public class PrivateEventController {
 
     private final EventService eventService;
 
@@ -27,6 +27,7 @@ public class EventPrivateController {
             @PathVariable Long userId
     ) {
         log.info("Создан ивент");
+
         return eventService.createEvent(dto, userId);
     }
 
@@ -36,6 +37,7 @@ public class EventPrivateController {
             @PathVariable Long userId
     ) {
         log.info("Отредактирован ивент");
+
         return eventService.editEvent(dto, userId);
     }
 
@@ -45,6 +47,7 @@ public class EventPrivateController {
             @PathVariable Long eventId
     ) {
         log.info("Запрошены события");
+
         return eventService.cancelEvent(userId, eventId);
     }
 
@@ -55,6 +58,7 @@ public class EventPrivateController {
             @RequestParam(defaultValue = "10", required = false) Integer size
     ) {
         log.info("Запрошены ивенты");
+
         return eventService.getEvents(userId, from, size);
     }
 
@@ -64,6 +68,7 @@ public class EventPrivateController {
             @PathVariable Long eventId
     ) {
         log.info("Запрошен ивент");
+
         return eventService.getEvent(eventId, userId);
     }
 
@@ -73,6 +78,7 @@ public class EventPrivateController {
             @PathVariable Long eventId
     ) {
         log.info("Запрошены заявки");
+
         return eventService.getRequests(userId, eventId);
     }
 
@@ -82,6 +88,7 @@ public class EventPrivateController {
             @PathVariable Long eventId,
             @PathVariable Long requestId) {
         log.info("Запрос на подтверждение заявки");
+
         return eventService.confirmRequest(userId, eventId, requestId);
     }
 
@@ -91,6 +98,7 @@ public class EventPrivateController {
             @PathVariable Long eventId,
             @PathVariable Long requestId) {
         log.info("Запрос на отклонение заявки");
+
         return eventService.rejectRequest(userId, eventId, requestId);
     }
 

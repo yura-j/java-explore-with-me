@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/admin/users")
-public class UsersAdminController {
+public class AdminUsersController {
 
     private final UserService userService;
 
@@ -26,18 +26,21 @@ public class UsersAdminController {
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         log.debug("Запрошены пользователи");
+
         return userService.getUsers(ids, from, size);
     }
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable Long userId) {
         log.info("Запрошен пользователь {}", userId);
+
         return userService.getUser(userId);
     }
 
     @PostMapping
     public UserDto createUser(@RequestBody @Validated(Base.class) UserDto dto) {
         log.info("Создан пользователь");
+
         return userService.createUser(dto);
     }
 

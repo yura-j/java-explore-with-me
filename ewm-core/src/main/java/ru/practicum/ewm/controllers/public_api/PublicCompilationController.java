@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/compilations")
 @Slf4j
-public class CompilationPublicController {
+public class PublicCompilationController {
 
     private final CompilationService compilationService;
 
@@ -23,14 +23,16 @@ public class CompilationPublicController {
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         log.info("Запрошены подборки");
+
         return compilationService.getCompilations(pinned, from, size);
     }
 
     @GetMapping("/{compilationId}")
-    public CompilationOutputDto get (
+    public CompilationOutputDto get(
             @PathVariable Long compilationId
     ) {
         log.info("Запрошена подборка, id {}", compilationId);
+
         return compilationService.get(compilationId);
     }
 }

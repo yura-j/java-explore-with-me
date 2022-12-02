@@ -46,6 +46,7 @@ public class EventMapper {
         String publishedOn = null == savedEvent.getPublishedOn()
                 ? ""
                 : savedEvent.getPublishedOn().format(dtFormat);
+
         return EventOutputDto.builder()
                 .id(savedEvent.getId())
                 .annotation(savedEvent.getAnnotation())

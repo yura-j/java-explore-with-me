@@ -1,6 +1,6 @@
 package ru.practicum.ewm.controllers.public_api;
 
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.error.ValidationException;
@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/events")
 @Slf4j
-public class EventsPublicController {
+public class PublicEventsController {
 
     private final EventService eventService;
 
@@ -40,14 +40,14 @@ public class EventsPublicController {
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         log.info("Поиск события");
-        EventsSortParam sort = null == sortParam
+        SortEventsParam sort = null == sortParam
                 ? null
                 : parseSort(sortParam);
         if (from < 0 || size < 0) {
             throw new ValidationException("Параметры from или size должны быть положительны");
         }
 
-        EventsPublicSearchParameters searchParams = EventsPublicSearchParameters
+        PublicEventsSearchParameters searchParams = PublicEventsSearchParameters
                 .builder()
                 .text(Optional.ofNullable(text))
                 .paid(Optional.ofNullable(paid))
@@ -64,11 +64,12 @@ public class EventsPublicController {
     }
 
 
-    private EventsSortParam parseSort(String sortParam) {
-        EventsSortParam sort = EventsSortParam.from(sortParam);
+    private SortEventsParam parseSort(String sortParam) {
+        SortEventsParam sort = SortEventsParam.from(sortParam);
         if (sort == null) {
             throw new IllegalArgumentException("Unknown state: " + sortParam);
         }
+
         return sort;
     }
 
@@ -77,6 +78,52 @@ public class EventsPublicController {
             return null;
         }
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         return LocalDateTime.parse(dateParameter, format);
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PublicEventsSearchParameters {
+        private Optional<String> text;
+        private Optional<List<Long>> categoryIds;
+        private Optional<Boolean> paid;
+        private Optional<LocalDateTime> rangeStart;
+        private Optional<LocalDateTime> rangeEnd;
+        private Optional<Boolean> onlyAvailable;
+        private Optional<SortEventsParam> sort;
+        private Optional<Integer> from;
+        private Optional<Integer> size;
+
+        @Override
+        public String toString() {
+            return "EventsPublicSearchParameters{" +
+                    "text=" + text +
+                    ", categoryIds=" + categoryIds +
+                    ", paid=" + paid +
+                    ", rangeStart=" + rangeStart +
+                    ", rangeEnd=" + rangeEnd +
+                    ", onlyAvailable=" + onlyAvailable +
+                    ", sort=" + sort +
+                    ", from=" + from +
+                    ", size=" + size +
+                    '}';
+        }
+    }
+
+    public enum SortEventsParam {
+        EVENT_DATE,
+        VIEWS;
+
+        public static SortEventsParam from(String statusParameter) {
+            try {
+                return SortEventsParam.valueOf(statusParameter);
+            } catch (Exception e) {
+                return null;
+            }
+        }
     }
 }

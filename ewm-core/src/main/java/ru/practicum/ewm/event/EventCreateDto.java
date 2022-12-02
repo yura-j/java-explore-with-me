@@ -12,14 +12,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class EventCreateDto {
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class Location {
-        private Float lon;
-        private Float lat;
-    }
-
     private String annotation;
     private Long category;
     @NotNull(groups = Base.class)
@@ -31,4 +23,12 @@ public class EventCreateDto {
     private Integer participantLimit;
     private Boolean requestModeration;
     private String title;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class Location {
+        private Float lon;
+        private Float lat;
+    }
 }

@@ -1,6 +1,6 @@
 package ru.practicum.ewm.controllers.admin;
 
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.error.ValidationException;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/admin/events")
 @Slf4j
-public class EventsAdminController {
+public class AdminEventsController {
 
     private final EventService eventService;
 
@@ -28,6 +28,7 @@ public class EventsAdminController {
             @PathVariable Long eventId
     ) {
         log.info("Публикация события {}", eventId);
+
         return eventService.publishEvent(eventId);
     }
 
@@ -36,6 +37,7 @@ public class EventsAdminController {
             @PathVariable Long eventId
     ) {
         log.info("Публикация события {}", eventId);
+
         return eventService.rejectEvent(eventId);
     }
 
@@ -45,6 +47,7 @@ public class EventsAdminController {
             @PathVariable Long eventId
     ) {
         log.info("Отредактирован ивент");
+
         return eventService.editEventByAdmin(dto, eventId);
     }
 
@@ -62,14 +65,14 @@ public class EventsAdminController {
         List<EventState> states = null == statesParameter
                 ? null
                 : statesParameter
-                    .stream()
-                    .map(this::parseState)
-                    .collect(Collectors.toList());
+                .stream()
+                .map(this::parseState)
+                .collect(Collectors.toList());
         if (from < 0 || size < 0) {
             throw new ValidationException("Параметры from или size должны быть положительны");
         }
 
-        EventsAdminSearchParameters searchParams = EventsAdminSearchParameters
+        AdminEventsSearchParameters searchParams = AdminEventsSearchParameters
                 .builder()
                 .userIds(Optional.ofNullable(userIds))
                 .states(Optional.ofNullable(states))
@@ -88,6 +91,7 @@ public class EventsAdminController {
             return null;
         }
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         return LocalDateTime.parse(dateParameter, format);
     }
 
@@ -96,6 +100,37 @@ public class EventsAdminController {
         if (status == null) {
             throw new IllegalArgumentException("Unknown state: " + s);
         }
+
         return status;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class AdminEventsSearchParameters {
+
+
+        private Optional<List<Long>> userIds;
+        private Optional<List<EventState>> states;
+        private Optional<List<Long>> categoryIds;
+        private Optional<LocalDateTime> rangeStart;
+        private Optional<LocalDateTime> rangeEnd;
+        private Optional<Integer> from;
+        private Optional<Integer> size;
+
+        @Override
+        public String toString() {
+            return "EventsAdminSearchParameters{" +
+                    "userIds=" + userIds +
+                    ", states=" + states +
+                    ", categoryIds=" + categoryIds +
+                    ", rangeStart=" + rangeStart +
+                    ", rangeEnd=" + rangeEnd +
+                    ", from=" + from +
+                    ", size=" + size +
+                    '}';
+        }
     }
 }

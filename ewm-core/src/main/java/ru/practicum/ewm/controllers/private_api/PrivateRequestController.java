@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/requests")
 @Slf4j
-public class RequestPrivateController {
+public class PrivateRequestController {
 
     private final RequestService requestService;
 
@@ -21,6 +21,7 @@ public class RequestPrivateController {
             @PathVariable Long userId
     ) {
         log.info("Пользователь запросил свои заявки на участие в событиях id:{}", userId);
+
         return requestService.getMyRequests(userId);
     }
 
@@ -30,6 +31,7 @@ public class RequestPrivateController {
             @RequestParam Long eventId
     ) {
         log.info("Пользователь{} создал запрос на участие в событии с id: {}", userId, eventId);
+
         return requestService.createRequest(userId, eventId);
     }
 
@@ -39,6 +41,7 @@ public class RequestPrivateController {
             @PathVariable Long requestId
     ) {
         log.info("Пользователь{} создал запрос{} на участие в событии", userId, requestId);
+
         return requestService.cancelRequest(userId, requestId);
     }
 }

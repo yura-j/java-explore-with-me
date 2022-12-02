@@ -19,6 +19,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleExceptionReturn404(final RuntimeException e) {
         log.info("404{}", e.getMessage());
+
         return new ErrorResponse(e.getMessage(), 404);
     }
 
@@ -26,6 +27,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleExceptionReturn409(final RuntimeException e) {
         log.info("409{}", e.getMessage());
+
         return new ErrorResponse(e.getMessage(), 409);
     }
 
@@ -33,6 +35,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleExceptionReturn403(final RuntimeException e) {
         log.info("403{}", e.getMessage());
+
         return new ErrorResponse(e.getMessage(), 403);
     }
 }

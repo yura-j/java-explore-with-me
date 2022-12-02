@@ -22,7 +22,9 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+
     public List<RequestDto> getMyRequests(Long userId) {
+
         return requestRepository
                 .findAllByRequesterId(userId)
                 .stream()
@@ -72,6 +74,7 @@ public class RequestService {
     public RequestDto cancelRequest(Long userId, Long requestId) {
         Request request = requestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(NotFoundException::new);
         request.setStatus(RequestStatus.CANCELED);
+
         return RequestMapper.toDto(request);
     }
 
