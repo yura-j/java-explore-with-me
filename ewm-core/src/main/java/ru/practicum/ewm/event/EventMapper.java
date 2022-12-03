@@ -66,8 +66,4 @@ public class EventMapper {
                 .participantLimit(savedEvent.getParticipantLimit())
                 .build();
     }
-
-    public static EventOutputDto toDto(Event savedEvent) {
-        return toDto(savedEvent, 0, 0);
-    }
 }

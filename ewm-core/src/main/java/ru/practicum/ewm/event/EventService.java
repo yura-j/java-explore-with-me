@@ -13,6 +13,7 @@ import ru.practicum.ewm.controllers.public_api.PublicEventsController;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.error.ValidationException;
 import ru.practicum.ewm.requests.*;
+import ru.practicum.ewm.statistic.client.StatisticService;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
 
@@ -23,20 +24,20 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EventService {
-    public static final Integer views = 999;
     private final EventRepository eventsRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
+    private final StatisticService statisticService;
     @PersistenceContext
     private final EntityManager em;
 
@@ -45,16 +46,15 @@ public class EventService {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
         Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(NotFoundException::new);
         Event event = EventMapper.getFromDto(dto, user, category, EventState.PENDING);
-        checkPublishData(event);
-        System.out.println(event);
+        validPublishDataThrowException(event);
         Event savedEvent = eventsRepository.save(event);
 
-        return EventMapper.toDto(savedEvent);
+        return EventMapper.toDto(savedEvent, 0, 0);
     }
 
     @Transactional
     public EventOutputDto editEvent(EventEditDto dto, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
+        userRepository.findById(userId).orElseThrow(NotFoundException::new);
         Event event = eventsRepository.findById(dto.getEventId()).orElseThrow(NotFoundException::new);
 
         Boolean stateIsOk = event.getState() == EventState.PENDING || event.getState() == EventState.CANCELED;
@@ -68,21 +68,22 @@ public class EventService {
         if (event.getState() == EventState.CANCELED) {
             event.setState(EventState.PENDING);
         }
-        checkPublishData(event);
+        validPublishDataThrowException(event);
 
         Event savedEvent = eventsRepository.save(event);
 
-        return EventMapper.toDto(savedEvent);
+        Integer views = statisticService
+                .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
+                .getOrDefault(event.getId(), 0);
+
+        return EventMapper.toDto(savedEvent, getParticipantsSize(event.getId()), views);
     }
 
     public List<EventOutputDto> getEvents(Long userId, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Event> events = eventsRepository.findByInitiatorId(userId, page);
 
-        return events
-                .stream()
-                .map(EventMapper::toDto)
-                .collect(Collectors.toList());
+        return getEventsOutputDto(events.stream(), events.stream());
     }
 
     @Transactional
@@ -93,13 +94,21 @@ public class EventService {
         }
         event.setState(EventState.CANCELED);
 
-        return EventMapper.toDto(event);
+        Integer views = statisticService
+                .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
+                .getOrDefault(event.getId(), 0);
+
+        return EventMapper.toDto(event, getParticipantsSize(event.getId()), views);
     }
 
     public EventOutputDto getEvent(Long eventId, Long userId) {
         Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
 
-        return EventMapper.toDto(event);
+        Integer views = statisticService
+                .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
+                .getOrDefault(event.getId(), 0);
+
+        return EventMapper.toDto(event, getParticipantsSize(event.getId()), views);
     }
 
     public List<RequestDto> getRequests(Long userId, Long eventId) {
@@ -148,13 +157,6 @@ public class EventService {
         return RequestMapper.toDto(request);
     }
 
-    private void checkPublishData(Event event) {
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationException("Дата и время события должны быть как минимум" +
-                    " на 2 часа позже текущей даты и времени");
-        }
-    }
-
     @Transactional
     public EventOutputDto publishEvent(Long eventId) {
         Event event = eventsRepository.findById(eventId).orElseThrow(NotFoundException::new);
@@ -169,9 +171,14 @@ public class EventService {
             throw new ValidationException("дата начала события должна быть не ранее чем за час от даты публикации");
         }
 
+        Integer views = statisticService
+                .getEventViews(List.of(eventId), getMinDateByIds(List.of(eventId)))
+                .getOrDefault(eventId, 0);
+
         return EventMapper.toDto(event, getParticipantsSize(eventId), views);
     }
 
+    @Transactional
     public EventOutputDto rejectEvent(Long eventId) {
         Event event = eventsRepository.findById(eventId).orElseThrow(NotFoundException::new);
         if (event.getState() == EventState.PUBLISHED) {
@@ -180,11 +187,11 @@ public class EventService {
 
         event.setState(EventState.CANCELED);
 
-        return EventMapper.toDto(event, getParticipantsSize(eventId), views);
-    }
+        Integer views = statisticService
+                .getEventViews(List.of(eventId), getMinDateByIds(List.of(eventId)))
+                .getOrDefault(eventId, 0);
 
-    private Integer getParticipantsSize(Long eventId) {
-        return requestRepository.countByIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        return EventMapper.toDto(event, getParticipantsSize(eventId), views);
     }
 
     @Transactional
@@ -193,40 +200,11 @@ public class EventService {
         fillEventFromDto(event, dto);
         Event savedEvent = eventsRepository.save(event);
 
-        return EventMapper.toDto(savedEvent);
-    }
+        Integer views = statisticService
+                .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
+                .getOrDefault(event.getId(), 0);
 
-    private void fillEventFromDto(Event event, EventEditDto dto) {
-        if (null != dto.getTitle()) {
-            event.setTitle(dto.getTitle());
-        }
-        if (null != dto.getAnnotation()) {
-            event.setAnnotation(dto.getAnnotation());
-        }
-        if (null != dto.getDescription()) {
-            event.setDescription(dto.getDescription());
-        }
-        if (null != dto.getCategory()) {
-            Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(NotFoundException::new);
-            event.setCategory(category);
-        }
-        if (null != dto.getEventDate()) {
-            event.setEventDate(EventMapper.parseDate(dto.getEventDate()));
-        }
-        if (null != dto.getPaid()) {
-            event.setPaid(dto.getPaid());
-        }
-        if (null != dto.getLocation()
-                && null != dto.getLocation().getLat()
-                && null != dto.getLocation().getLon()
-        ) {
-            event.setLat(dto.getLocation().getLat());
-            event.setLon(dto.getLocation().getLon());
-        }
-
-        if (null != dto.getParticipantLimit()) {
-            event.setParticipantLimit(dto.getParticipantLimit());
-        }
+        return EventMapper.toDto(savedEvent, getParticipantsSize(event.getId()), views);
     }
 
     public List<EventOutputDto> searchEvents(AdminEventsController.AdminEventsSearchParameters searchParams) {
@@ -274,29 +252,15 @@ public class EventService {
                 .setFirstResult(searchParams.getFrom().get())
                 .setMaxResults(searchParams.getSize().get())
                 .getResultList();
-        List<Long> eventIds = events
-                .stream()
-                .map(Event::getId)
-                .collect(Collectors.toList());
 
-        List<Request> confirmedRequests = requestRepository
-                .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
-
-        return
-                events
-                        .stream()
-                        .map(event -> {
-                            long count = confirmedRequests
-                                    .stream()
-                                    .filter(request -> Objects.equals(request.getEvent().getId(), event.getId()))
-                                    .count();
-                            return EventMapper.toDto(event, Math.toIntExact(count), views);
-                        })
-                        .collect(Collectors.toList());
+        return getEventsOutputDto(events.stream(), events.stream());
 
     }
 
-    public List<EventOutputDto> searchPublicEvents(PublicEventsController.PublicEventsSearchParameters searchParams) {
+    public List<EventOutputDto> searchPublicEvents(PublicEventsController.PublicEventsSearchParameters searchParams, String ip, String uri) {
+
+        statisticService.saveHit(uri, ip);
+
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> root = query.from(Event.class);
@@ -359,6 +323,9 @@ public class EventService {
         List<Request> confirmedRequests = requestRepository
                 .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
 
+        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds,
+                getMinDateByIds(eventIds));
+
         return
                 events
                         .stream()
@@ -367,7 +334,9 @@ public class EventService {
                                     .stream()
                                     .filter(request -> Objects.equals(request.getEvent().getId(), event.getId()))
                                     .count();
-                            return EventMapper.toDto(event, Math.toIntExact(count), views);
+                            return EventMapper.toDto(event,
+                                    Math.toIntExact(count),
+                                    eventsViews.getOrDefault(event.getId(), 0));
                         })
                         .filter(dto -> {
                             if (searchParams.getOnlyAvailable().isPresent()
@@ -379,9 +348,102 @@ public class EventService {
                         .collect(Collectors.toList());
     }
 
-    public EventOutputDto findById(Long id) {
+    public EventOutputDto findById(Long id, String ip) {
         Event event = eventsRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(NotFoundException::new);
 
+        statisticService.saveHit("/events/" + id, ip);
+
+        Integer views = statisticService
+                .getEventViews(List.of(id), getMinDateByIds(List.of(id)))
+                .getOrDefault(id, 0);
+
         return EventMapper.toDto(event, getParticipantsSize(id), views);
+    }
+
+    public String getMinDateByIds(List<Long> eventIds) {
+        DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        Optional<LocalDateTime> minDate = eventsRepository
+                .findAllById(eventIds)
+                .stream()
+                .map(Event::getTimestamp)
+                .min(LocalDateTime::compareTo);
+        if (minDate.isEmpty()) {
+
+            return LocalDateTime.now().format(dtFormat);
+        }
+
+        return minDate.get().format(dtFormat);
+    }
+
+    private List<EventOutputDto> getEventsOutputDto(Stream<Event> stream, Stream<Event> eventStream) {
+        List<Long> eventIds = stream
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        List<Request> confirmedRequests = requestRepository
+                .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
+
+        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds,
+                getMinDateByIds(eventIds));
+
+        return
+                eventStream
+                        .map(event -> {
+                            long count = confirmedRequests
+                                    .stream()
+                                    .filter(request -> Objects.equals(
+                                            request.getEvent().getId(),
+                                            event.getId()))
+                                    .count();
+
+                            return EventMapper.toDto(event,
+                                    Math.toIntExact(count),
+                                    eventsViews.getOrDefault(event.getId(), 0));
+                        })
+                        .collect(Collectors.toList());
+    }
+
+    private void fillEventFromDto(Event event, EventEditDto dto) {
+        if (null != dto.getTitle()) {
+            event.setTitle(dto.getTitle());
+        }
+        if (null != dto.getAnnotation()) {
+            event.setAnnotation(dto.getAnnotation());
+        }
+        if (null != dto.getDescription()) {
+            event.setDescription(dto.getDescription());
+        }
+        if (null != dto.getCategory()) {
+            Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(NotFoundException::new);
+            event.setCategory(category);
+        }
+        if (null != dto.getEventDate()) {
+            event.setEventDate(EventMapper.parseDate(dto.getEventDate()));
+        }
+        if (null != dto.getPaid()) {
+            event.setPaid(dto.getPaid());
+        }
+        if (null != dto.getLocation()
+                && null != dto.getLocation().getLat()
+                && null != dto.getLocation().getLon()
+        ) {
+            event.setLat(dto.getLocation().getLat());
+            event.setLon(dto.getLocation().getLon());
+        }
+
+        if (null != dto.getParticipantLimit()) {
+            event.setParticipantLimit(dto.getParticipantLimit());
+        }
+    }
+
+    private Integer getParticipantsSize(Long eventId) {
+        return requestRepository.countByIdAndStatus(eventId, RequestStatus.CONFIRMED);
+    }
+
+    private void validPublishDataThrowException(Event event) {
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ValidationException("Дата и время события должны быть как минимум" +
+                    " на 2 часа позже текущей даты и времени");
+        }
     }
 }

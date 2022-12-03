@@ -14,7 +14,7 @@ public class BaseErrorHandler {
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleExceptionReturn400(final Throwable e) {
-        log.debug("400", e);
+        log.info("400", e);
 
         return new ErrorResponse(e.getMessage(), 400);
     }

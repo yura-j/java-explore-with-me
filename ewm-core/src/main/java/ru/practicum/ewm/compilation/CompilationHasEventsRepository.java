@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface CompilationHasEventsRepository extends JpaRepository<CompilationHasEvents, Long> {
     List<CompilationHasEvents> findAllByCompilationIdIn(List<Long> compilationIds);
+
     void deleteByCompilationIdAndEventId(Long compilationId, Long eventId);
 }

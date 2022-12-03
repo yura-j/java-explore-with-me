@@ -1,11 +1,11 @@
 package ru.practicum.ewm.compilation;
 
-import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.requests.Request;
 import ru.practicum.ewm.user.User;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -13,7 +13,9 @@ public class CompilationMapper {
 
     public static final DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public static CompilationOutputDto toDto(Compilation compilation, List<Request> confirmedRequests) {
+    public static CompilationOutputDto toDto(Compilation compilation,
+                                             List<Request> confirmedRequests,
+                                             Map<Long, Integer> eventViews) {
         List<CompilationOutputDto.Event> events = null == compilation.getEvents()
                 ? List.of()
                 : compilation.getEvents()
@@ -38,7 +40,7 @@ public class CompilationMapper {
                                     .eventDate(event.getEventDate().format(dtFormat))
                                     .title(event.getTitle())
                                     .paid(event.getPaid())
-                                    .views(EventService.views)
+                                    .views(eventViews.getOrDefault(event.getId(), 0))
                                     .annotation(event.getAnnotation())
                                     .category(category)
                                     .confirmedRequests(confirmedCount)

@@ -44,6 +44,7 @@ public class StatisticService {
 
         StatisticHitModel statistic = StatisticMapper.fromDto(dto);
         StatisticHitModel updatedStatistic = statisticRepository.save(statistic);
+
         return StatisticMapper.toDto(updatedStatistic);
     }
 }

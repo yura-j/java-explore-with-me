@@ -7,13 +7,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.error.NotFoundException;
+import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.requests.Request;
 import ru.practicum.ewm.requests.RequestRepository;
 import ru.practicum.ewm.requests.RequestStatus;
+import ru.practicum.ewm.statistic.client.StatisticService;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -25,7 +28,10 @@ public class CompilationService {
     private final CompilationHasEventsRepository compilationHasEventsRepository;
     private final RequestRepository requestRepository;
 
+    private final EventService eventService;
+
     private final EntityManager em;
+    private final StatisticService statisticService;
 
     @Transactional
     public CompilationOutputDto create(CompilationInputDto dto) {
@@ -39,16 +45,21 @@ public class CompilationService {
         if (null != dto.getEvents()) {
             addEvents(dto.getEvents(), compilation);
         }
-        List<Request> confirmedRequests = requestRepository.findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED,
-                getEventsIdsByCompilationIds(List.of(compilation.getId())));
+        List<Long> eventIds = getEventsIdsByCompilationIds(List.of(compilation.getId()));
+        List<Request> confirmedRequests = requestRepository
+                .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
 
         em.clear();
+
+
+        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return CompilationMapper.toDto(
                 compilationRepository
                         .findById(compilation.getId())
                         .orElseThrow(NotFoundException::new),
-                confirmedRequests
+                confirmedRequests,
+                eventsViews
         );
     }
 
@@ -115,25 +126,31 @@ public class CompilationService {
                         .stream()
                         .map(Compilation::getId)
                         .collect(Collectors.toList());
-        List<Request> confirmedRequests = requestRepository.findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED,
-                getEventsIdsByCompilationIds(compilationIds));
+        List<Long> eventIds = getEventsIdsByCompilationIds(compilationIds);
+        List<Request> confirmedRequests = requestRepository
+                .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
+        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return compilations
                 .stream()
-                .map(c -> CompilationMapper.toDto(c, confirmedRequests))
+                .map(c -> CompilationMapper.toDto(c, confirmedRequests, eventsViews))
                 .collect(Collectors.toList());
     }
 
     public CompilationOutputDto get(Long compilationId) {
         Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(NotFoundException::new);
-        List<Request> confirmedRequests = requestRepository.findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED,
-                getEventsIdsByCompilationIds(List.of(compilation.getId())));
+        List<Long> eventIds = getEventsIdsByCompilationIds(List.of(compilation.getId()));
+        List<Request> confirmedRequests = requestRepository
+                .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
+
+        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return CompilationMapper.toDto(
                 compilationRepository
                         .findById(compilation.getId())
                         .orElseThrow(NotFoundException::new),
-                confirmedRequests
+                confirmedRequests,
+                eventsViews
         );
     }
 }

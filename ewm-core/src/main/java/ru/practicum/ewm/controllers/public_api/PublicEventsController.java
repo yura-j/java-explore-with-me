@@ -7,6 +7,7 @@ import ru.practicum.ewm.error.ValidationException;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,9 +23,12 @@ public class PublicEventsController {
 
     @GetMapping("/{id}")
     public EventOutputDto get(
-            @PathVariable Long id
+            @PathVariable Long id,
+            HttpServletRequest request
     ) {
-        return eventService.findById(id);
+        log.info("Запрошено событие");
+        String ip = request.getRemoteAddr();
+        return eventService.findById(id, ip);
     }
 
     @GetMapping
@@ -37,7 +41,8 @@ public class PublicEventsController {
             @RequestParam(required = false) String rangeStartParameter,
             @RequestParam(required = false) String rangeEndParameter,
             @RequestParam(required = false, defaultValue = "0") Integer from,
-            @RequestParam(required = false, defaultValue = "10") Integer size
+            @RequestParam(required = false, defaultValue = "10") Integer size,
+            HttpServletRequest request
     ) {
         log.info("Поиск события");
         SortEventsParam sort = null == sortParam
@@ -59,8 +64,10 @@ public class PublicEventsController {
                 .from(Optional.of(from))
                 .size(Optional.of(size))
                 .build();
+        String ip = request.getRemoteAddr();
+        String uri = request.getRequestURI();
 
-        return eventService.searchPublicEvents(searchParams);
+        return eventService.searchPublicEvents(searchParams, ip, uri);
     }
 
 
@@ -80,6 +87,19 @@ public class PublicEventsController {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return LocalDateTime.parse(dateParameter, format);
+    }
+
+    public enum SortEventsParam {
+        EVENT_DATE,
+        VIEWS;
+
+        public static SortEventsParam from(String statusParameter) {
+            try {
+                return SortEventsParam.valueOf(statusParameter);
+            } catch (Exception e) {
+                return null;
+            }
+        }
     }
 
     @Getter
@@ -111,19 +131,6 @@ public class PublicEventsController {
                     ", from=" + from +
                     ", size=" + size +
                     '}';
-        }
-    }
-
-    public enum SortEventsParam {
-        EVENT_DATE,
-        VIEWS;
-
-        public static SortEventsParam from(String statusParameter) {
-            try {
-                return SortEventsParam.valueOf(statusParameter);
-            } catch (Exception e) {
-                return null;
-            }
         }
     }
 }
