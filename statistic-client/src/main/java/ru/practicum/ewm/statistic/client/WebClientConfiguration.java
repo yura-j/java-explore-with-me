@@ -10,10 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfiguration {
     @Bean
     public WebClient makeWebClient() {
-        String url = System.getenv("STATSERV_URL");
-        //String url = "http://localhost:9090";
+
         return WebClient.builder()
-                .baseUrl(url)
+                .baseUrl(System.getenv("STATSERV_URL"))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

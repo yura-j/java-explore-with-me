@@ -22,7 +22,7 @@ public class StatisticService {
     private final WebClient wc;
 
     public void saveHit(String uri, String ip) {
-        /*try {*/
+        try {
             wc.post()
                     .uri("/hit")
                     .body(Mono.just(StatisticHitDto
@@ -36,8 +36,8 @@ public class StatisticService {
                     .retrieve()
                     .bodyToMono(StatisticHitDto.class)
                     .block();
-       /* } catch (Throwable ignored) {
-        }*/
+        } catch (Throwable ignored) {
+        }
     }
 
     public Map<Long, Integer> getEventViews(List<Long> eventIds, String start) {
