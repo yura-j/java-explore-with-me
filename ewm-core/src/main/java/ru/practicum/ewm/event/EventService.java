@@ -349,9 +349,9 @@ public class EventService {
     }
 
     public EventOutputDto findById(Long id, String ip) {
-        Event event = eventsRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(NotFoundException::new);
-
         statisticService.saveHit("/events/" + id, ip);
+
+        Event event = eventsRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(NotFoundException::new);
 
         Integer views = statisticService
                 .getEventViews(List.of(id), getMinDateByIds(List.of(id)))

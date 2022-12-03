@@ -8,12 +8,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfiguration {
-    private static final String BASE_URL = "http://localhost:9090";
-
     @Bean
     public WebClient makeWebClient() {
+        String url = System.getenv("STATSERV_URL");
+        //String url = "http://localhost:9090";
         return WebClient.builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(url)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

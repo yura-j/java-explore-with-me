@@ -22,20 +22,22 @@ public class StatisticService {
     private final WebClient wc;
 
     public void saveHit(String uri, String ip) {
-        wc.post()
-                .uri("/hit")
-                .body(Mono.just(StatisticHitDto
-                                .builder()
-                                .app(APP)
-                                .uri(uri)
-                                .ip(ip)
-                                .build()),
-                        StatisticHitDto.class
-                )
-                .retrieve()
-                .bodyToMono(StatisticHitDto.class)
-                .block();
-        ;
+        /*try {*/
+            wc.post()
+                    .uri("/hit")
+                    .body(Mono.just(StatisticHitDto
+                                    .builder()
+                                    .app(APP)
+                                    .uri(uri)
+                                    .ip(ip)
+                                    .build()),
+                            StatisticHitDto.class
+                    )
+                    .retrieve()
+                    .bodyToMono(StatisticHitDto.class)
+                    .block();
+       /* } catch (Throwable ignored) {
+        }*/
     }
 
     public Map<Long, Integer> getEventViews(List<Long> eventIds, String start) {
