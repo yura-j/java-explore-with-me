@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.controller.admin.AdminEventsController;
-import ru.practicum.ewm.controller.public_api.PublicEventsController;
+import ru.practicum.ewm.controller.admin.AdminEventsSearchParameters;
+import ru.practicum.ewm.controller.public_api.PublicEventsSearchParameters;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.request.*;
@@ -207,40 +207,40 @@ public class EventService {
         return EventMapper.toDto(savedEvent, getParticipantsSize(event.getId()), views);
     }
 
-    public List<EventOutputDto> searchEvents(AdminEventsController.AdminEventsSearchParameters searchParams) {
+    public List<EventOutputDto> searchEvents(AdminEventsSearchParameters searchParams) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> fields = query.from(Event.class);
         CriteriaQuery<Event> select = query.select(fields);
         List<Predicate> predicates = new ArrayList<>();
 
-        if (searchParams.getUserIds().isPresent()) {
+        if (searchParams.getUserIds() != null) {
             predicates.add(cb.in(fields
                     .get("initiatorId")
                     .in(searchParams.getUserIds())
             ));
         }
-        if (searchParams.getCategoryIds().isPresent()) {
+        if (searchParams.getCategoryIds() != null) {
             predicates.add(cb.in(fields
                     .get("categoryId")
                     .in(searchParams.getCategoryIds())
             ));
         }
-        if (searchParams.getStates().isPresent()) {
+        if (searchParams.getStates() != null) {
             predicates.add(cb.in(fields
                     .get("state")
                     .in(searchParams.getStates())
             ));
         }
-        if (searchParams.getRangeStart().isPresent()
-                && searchParams.getRangeEnd().isPresent()
+        if (searchParams.getRangeStart() != null
+                && searchParams.getRangeEnd() != null
         ) {
             predicates.add(cb.between(fields.get("eventDate"),
-                    searchParams.getRangeStart().get(),
-                    searchParams.getRangeEnd().get()
+                    searchParams.getRangeStart(),
+                    searchParams.getRangeEnd()
             ));
         }
-        if (searchParams.getSize().isEmpty() || searchParams.getFrom().isEmpty()) {
+        if (searchParams.getSize() == null || searchParams.getFrom() == null) {
             throw new ValidationException("Произошла ошибка");
         }
         select
@@ -249,15 +249,15 @@ public class EventService {
 
         List<Event> events = em
                 .createQuery(select)
-                .setFirstResult(searchParams.getFrom().get())
-                .setMaxResults(searchParams.getSize().get())
+                .setFirstResult(searchParams.getFrom())
+                .setMaxResults(searchParams.getSize())
                 .getResultList();
 
         return getEventsOutputDto(events.stream(), events.stream());
 
     }
 
-    public List<EventOutputDto> searchPublicEvents(PublicEventsController.PublicEventsSearchParameters searchParams, String ip, String uri) {
+    public List<EventOutputDto> searchPublicEvents(PublicEventsSearchParameters searchParams, String ip, String uri) {
 
         clientStatisticService.saveHit(uri, ip);
 
@@ -269,34 +269,34 @@ public class EventService {
 
         predicates.add(cb.equal(root.get("state"), EventState.PUBLISHED));
 
-        if (searchParams.getPaid().isPresent()) {
+        if (searchParams.getPaid() != null) {
             predicates.add(cb.equal(root.get("paid"),
-                    searchParams.getPaid().get())
+                    searchParams.getPaid())
             );
         }
 
-        if (searchParams.getText().isPresent()) {
+        if (searchParams.getText() != null) {
             predicates.add(cb.or(
                     cb.like(cb.lower(root.get("annotation")),
-                            "%" + searchParams.getText().get().toLowerCase() + "%"),
+                            "%" + searchParams.getText().toLowerCase() + "%"),
                     cb.like(cb.lower(root.get("description")),
-                            "%" + searchParams.getText().get().toLowerCase() + "%")
+                            "%" + searchParams.getText().toLowerCase() + "%")
             ));
         }
 
-        if (searchParams.getCategoryIds().isPresent()) {
+        if (searchParams.getCategoryIds() != null) {
             predicates.add(cb.in(root
                     .get("categoryId")
                     .in(searchParams.getCategoryIds())
             ));
         }
 
-        if (searchParams.getRangeStart().isPresent()
-                && searchParams.getRangeEnd().isPresent()
+        if (searchParams.getRangeStart() != null
+                && searchParams.getRangeEnd() != null
         ) {
             predicates.add(cb.between(root.get("eventDate"),
-                    searchParams.getRangeStart().get(),
-                    searchParams.getRangeEnd().get()
+                    searchParams.getRangeStart(),
+                    searchParams.getRangeEnd()
             ));
         } else {
             predicates.add(cb.greaterThan(root.get("eventDate"),
@@ -304,7 +304,7 @@ public class EventService {
             ));
         }
 
-        if (searchParams.getSize().isEmpty() || searchParams.getFrom().isEmpty()) {
+        if (searchParams.getSize() == null || searchParams.getFrom() == null) {
             throw new ValidationException("Произошла ошибка");
         }
 
@@ -312,8 +312,8 @@ public class EventService {
 
         List<Event> events = em
                 .createQuery(select)
-                .setFirstResult(searchParams.getFrom().get())
-                .setMaxResults(searchParams.getSize().get())
+                .setFirstResult(searchParams.getFrom())
+                .setMaxResults(searchParams.getSize())
                 .getResultList();
         List<Long> eventIds = events
                 .stream()
@@ -339,8 +339,8 @@ public class EventService {
                                     eventsViews.getOrDefault(event.getId(), 0));
                         })
                         .filter(dto -> {
-                            if (searchParams.getOnlyAvailable().isPresent()
-                                    && searchParams.getOnlyAvailable().get()) {
+                            if (searchParams.getOnlyAvailable() != null
+                                    && searchParams.getOnlyAvailable()) {
                                 return dto.getConfirmedRequests() < dto.getParticipantLimit();
                             }
                             return true;

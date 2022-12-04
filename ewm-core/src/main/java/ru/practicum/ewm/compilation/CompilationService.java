@@ -125,9 +125,7 @@ public class CompilationService {
         Map<Long, Integer> eventsViews = clientStatisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return CompilationMapper.toDto(
-                compilationRepository
-                        .findById(compilation.getId())
-                        .orElseThrow(() -> new NotFoundException("Не найдено")),
+                compilation,
                 confirmedRequests,
                 eventsViews
         );

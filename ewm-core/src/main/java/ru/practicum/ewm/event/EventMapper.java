@@ -42,7 +42,7 @@ public class EventMapper {
 
         String createdOn = savedEvent.getTimestamp().format(DTFormat.format);
         String publishedOn = "";
-        if (null != savedEvent.getPublishedOn()){
+        if (null != savedEvent.getPublishedOn()) {
             publishedOn = savedEvent.getPublishedOn().format(DTFormat.format);
         }
 

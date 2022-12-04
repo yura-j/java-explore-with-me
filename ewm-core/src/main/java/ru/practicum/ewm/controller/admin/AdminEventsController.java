@@ -1,18 +1,17 @@
 package ru.practicum.ewm.controller.admin;
 
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.event.EventEditDto;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.EventState;
+import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.util.DTFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -78,13 +77,13 @@ public class AdminEventsController {
 
         AdminEventsSearchParameters searchParams = AdminEventsSearchParameters
                 .builder()
-                .userIds(Optional.ofNullable(userIds))
-                .states(Optional.ofNullable(states))
-                .categoryIds(Optional.ofNullable(categoryIds))
-                .rangeStart(Optional.ofNullable(parseDate(rangeStartParameter)))
-                .rangeEnd(Optional.ofNullable(parseDate(rangeEndParameter)))
-                .from(Optional.of(from))
-                .size(Optional.of(size))
+                .userIds(userIds)
+                .states(states)
+                .categoryIds(categoryIds)
+                .rangeStart(parseDate(rangeStartParameter))
+                .rangeEnd(parseDate(rangeEndParameter))
+                .from(from)
+                .size(size)
                 .build();
 
         return eventService.searchEvents(searchParams);
@@ -105,35 +104,5 @@ public class AdminEventsController {
         }
 
         return status;
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class AdminEventsSearchParameters {
-
-
-        private Optional<List<Long>> userIds;
-        private Optional<List<EventState>> states;
-        private Optional<List<Long>> categoryIds;
-        private Optional<LocalDateTime> rangeStart;
-        private Optional<LocalDateTime> rangeEnd;
-        private Optional<Integer> from;
-        private Optional<Integer> size;
-
-        @Override
-        public String toString() {
-            return "EventsAdminSearchParameters{" +
-                    "userIds=" + userIds +
-                    ", states=" + states +
-                    ", categoryIds=" + categoryIds +
-                    ", rangeStart=" + rangeStart +
-                    ", rangeEnd=" + rangeEnd +
-                    ", from=" + from +
-                    ", size=" + size +
-                    '}';
-        }
     }
 }
