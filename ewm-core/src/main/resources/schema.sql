@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS compilation_has_event;
 DROP TABLE IF EXISTS requests;
+DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS compilations;
@@ -54,8 +55,8 @@ CREATE TABLE IF NOT EXISTS events
     title              VARCHAR(512)                            NOT NULL,
     event_date         TIMESTAMP                               NOT NULL,
     published_on       TIMESTAMP,
-    lat                double precision                        NOT NULL,
-    lon                double precision                        NOT NULL,
+    lat                float4                                  NOT NULL,
+    lon                float4                                  NOT NULL,
     paid               BOOLEAN                                 NOT NULL,
     participant_limit  INTEGER                                 NOT NULL,
     request_moderation BOOLEAN                                 NOT NULL,

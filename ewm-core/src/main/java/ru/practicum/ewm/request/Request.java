@@ -19,6 +19,8 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private RequestStatus status;
 
@@ -29,6 +31,7 @@ public class Request {
     @Column(
             name = "event_id",
             insertable = false,
+            nullable = false,
             updatable = false)
     private Long eventId;
 

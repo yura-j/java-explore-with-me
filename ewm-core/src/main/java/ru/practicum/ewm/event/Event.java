@@ -19,17 +19,32 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String description;
+    @Column(nullable = false)
     private String annotation;
+
+    @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private EventState state;
+
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private LocalDateTime eventDate;
+
     private LocalDateTime publishedOn;
+
+    @Column(nullable = false)
     private Float lat;
+    @Column(nullable = false)
     private Float lon;
+    @Column(nullable = false)
     private Boolean paid;
+    @Column(nullable = false)
     private Integer participantLimit;
+    @Column(nullable = false)
     private Boolean requestModeration;
 
     @ManyToOne

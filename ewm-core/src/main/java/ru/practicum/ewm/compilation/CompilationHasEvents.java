@@ -15,8 +15,8 @@ public class CompilationHasEvents {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "event_id")
+    @Column(name = "event_id", nullable = false)
     private Long eventId;
-    @Column(name = "compilation_id")
+    @Column(name = "compilation_id", nullable = false)
     private Long compilationId;
 }

@@ -3,7 +3,7 @@ package ru.practicum.ewm.controller.admin;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.error.ValidationException;
+import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.event.EventEditDto;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
