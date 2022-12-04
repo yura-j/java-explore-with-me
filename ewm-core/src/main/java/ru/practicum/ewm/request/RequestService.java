@@ -1,4 +1,4 @@
-package ru.practicum.ewm.requests;
+package ru.practicum.ewm.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

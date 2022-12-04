@@ -1,4 +1,4 @@
-package ru.practicum.ewm.controllers.admin;
+package ru.practicum.ewm.controller.admin;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.compilation.CompilationInputDto;
 import ru.practicum.ewm.compilation.CompilationOutputDto;
 import ru.practicum.ewm.compilation.CompilationService;
-import ru.practicum.ewm.markers.Base;
+import ru.practicum.ewm.marker.Base;
 
 @RestController
 @RequiredArgsConstructor

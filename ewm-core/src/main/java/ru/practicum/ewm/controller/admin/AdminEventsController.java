@@ -1,4 +1,4 @@
-package ru.practicum.ewm.controllers.admin;
+package ru.practicum.ewm.controller.admin;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

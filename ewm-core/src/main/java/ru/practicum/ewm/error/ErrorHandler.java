@@ -18,7 +18,7 @@ public class ErrorHandler {
     @ExceptionHandler({NotFoundException.class, NoSuchElementException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleExceptionReturn404(final RuntimeException e) {
-        log.info("404{}", e.getMessage());
+        log.info("404 {}", e.getMessage());
 
         return new ErrorResponse(e.getMessage(), 404);
     }
@@ -26,7 +26,7 @@ public class ErrorHandler {
     @ExceptionHandler({AlreadyExistException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleExceptionReturn409(final RuntimeException e) {
-        log.info("409{}", e.getMessage());
+        log.info("409 {}", e.getMessage());
 
         return new ErrorResponse(e.getMessage(), 409);
     }
@@ -34,8 +34,16 @@ public class ErrorHandler {
     @ExceptionHandler(HasNoAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleExceptionReturn403(final RuntimeException e) {
-        log.info("403{}", e.getMessage());
+        log.info("403 {}", e.getMessage());
 
         return new ErrorResponse(e.getMessage(), 403);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleExceptionReturn400(final ValidationException e) {
+        log.info("400 {}", e.getMessage());
+
+        return new ErrorResponse(e.getMessage(), 400);
     }
 }

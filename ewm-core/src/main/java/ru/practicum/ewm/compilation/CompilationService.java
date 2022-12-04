@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.error.NotFoundException;
 import ru.practicum.ewm.event.EventService;
-import ru.practicum.ewm.requests.Request;
-import ru.practicum.ewm.requests.RequestRepository;
-import ru.practicum.ewm.requests.RequestStatus;
+import ru.practicum.ewm.request.Request;
+import ru.practicum.ewm.request.RequestRepository;
+import ru.practicum.ewm.request.RequestStatus;
 import ru.practicum.ewm.statistic.client.StatisticService;
 
 import javax.persistence.EntityManager;
@@ -91,8 +91,7 @@ public class CompilationService {
     }
 
     private void addEvents(List<Long> eventsIds, Compilation compilation) {
-        for (Long eventId :
-                eventsIds) {
+        for (Long eventId : eventsIds) {
             addEventByCompilationIdAndEventId(compilation.getId(), eventId);
         }
     }

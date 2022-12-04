@@ -1,6 +1,6 @@
 package ru.practicum.ewm.compilation;
 
-import ru.practicum.ewm.requests.Request;
+import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.user.User;
 
 import java.time.format.DateTimeFormatter;

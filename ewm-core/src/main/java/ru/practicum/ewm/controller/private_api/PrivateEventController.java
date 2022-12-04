@@ -1,4 +1,4 @@
-package ru.practicum.ewm.controllers.private_api;
+package ru.practicum.ewm.controller.private_api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,8 @@ import ru.practicum.ewm.event.EventCreateDto;
 import ru.practicum.ewm.event.EventEditDto;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
-import ru.practicum.ewm.markers.Base;
-import ru.practicum.ewm.requests.RequestDto;
+import ru.practicum.ewm.marker.Base;
+import ru.practicum.ewm.request.RequestDto;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package ru.practicum.ewm.controllers.private_api;
+package ru.practicum.ewm.controller.private_api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.requests.RequestDto;
-import ru.practicum.ewm.requests.RequestService;
+import ru.practicum.ewm.request.RequestDto;
+import ru.practicum.ewm.request.RequestService;
 
 import java.util.List;
 

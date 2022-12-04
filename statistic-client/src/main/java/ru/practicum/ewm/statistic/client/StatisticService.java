@@ -1,6 +1,7 @@
 package ru.practicum.ewm.statistic.client;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriUtils;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StatisticService {
 
     private static final String APP = "EWM";
@@ -36,7 +38,8 @@ public class StatisticService {
                     .retrieve()
                     .bodyToMono(StatisticHitDto.class)
                     .block();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            log.info("Ошибка при отправке данных на сервер статистики", e);
         }
     }
 
@@ -60,14 +63,14 @@ public class StatisticService {
                             .bodyToMono(StatisticDto[].class)
                             .block();
             if (null != statistic) {
-                for (StatisticDto dto :
-                        statistic) {
+                for (StatisticDto dto : statistic) {
                     String uri = dto.getUri();
                     Long id = getEventIdFromEventUri(uri);
                     eventViews.put(id, Math.toIntExact(dto.getHits()));
                 }
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            log.info("Ошибка при получении данных с сервера статистики", e);
         }
 
         return eventViews;

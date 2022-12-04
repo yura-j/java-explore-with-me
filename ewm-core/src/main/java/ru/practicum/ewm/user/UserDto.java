@@ -1,7 +1,7 @@
 package ru.practicum.ewm.user;
 
 import lombok.*;
-import ru.practicum.ewm.markers.Base;
+import ru.practicum.ewm.marker.Base;
 
 import javax.validation.constraints.NotEmpty;
 
