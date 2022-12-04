@@ -6,8 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.event.EventService;
+import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.request.RequestStatus;
@@ -90,31 +90,6 @@ public class CompilationService {
         compilation.setPinned(false);
     }
 
-    private void addEvents(List<Long> eventsIds, Compilation compilation) {
-        for (Long eventId : eventsIds) {
-            addEventByCompilationIdAndEventId(compilation.getId(), eventId);
-        }
-    }
-
-    private List<Long> getEventsIdsByCompilationIds(List<Long> compilationIds) {
-        List<CompilationHasEvents> eventsRecords = compilationHasEventsRepository
-                .findAllByCompilationIdIn(compilationIds);
-
-        return eventsRecords
-                .stream()
-                .map(CompilationHasEvents::getEventId)
-                .collect(Collectors.toList());
-    }
-
-    private void addEventByCompilationIdAndEventId(Long compilationId, Long eventId) {
-        CompilationHasEvents compilationHasEvents = CompilationHasEvents
-                .builder()
-                .compilationId(compilationId)
-                .eventId(eventId)
-                .build();
-        compilationHasEventsRepository.save(compilationHasEvents);
-    }
-
     public List<CompilationOutputDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Compilation> compilations;
@@ -154,5 +129,30 @@ public class CompilationService {
                 confirmedRequests,
                 eventsViews
         );
+    }
+
+    private void addEvents(List<Long> eventsIds, Compilation compilation) {
+        for (Long eventId : eventsIds) {
+            addEventByCompilationIdAndEventId(compilation.getId(), eventId);
+        }
+    }
+
+    private List<Long> getEventsIdsByCompilationIds(List<Long> compilationIds) {
+        List<CompilationHasEvents> eventsRecords = compilationHasEventsRepository
+                .findAllByCompilationIdIn(compilationIds);
+
+        return eventsRecords
+                .stream()
+                .map(CompilationHasEvents::getEventId)
+                .collect(Collectors.toList());
+    }
+
+    private void addEventByCompilationIdAndEventId(Long compilationId, Long eventId) {
+        CompilationHasEvents compilationHasEvents = CompilationHasEvents
+                .builder()
+                .compilationId(compilationId)
+                .eventId(eventId)
+                .build();
+        compilationHasEventsRepository.save(compilationHasEvents);
     }
 }
