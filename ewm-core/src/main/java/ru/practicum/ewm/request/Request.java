@@ -20,7 +20,7 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     @Enumerated(value = EnumType.STRING)
     private RequestStatus status;
 

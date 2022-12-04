@@ -24,11 +24,11 @@ public class Event {
     @Column(nullable = false)
     private String annotation;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     @Enumerated(value = EnumType.STRING)
     private EventState state;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     private String title;
 
     @Column(nullable = false)

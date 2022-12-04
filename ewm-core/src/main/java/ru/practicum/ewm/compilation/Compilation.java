@@ -20,7 +20,7 @@ public class Compilation {
     private Long id;
     @Column(nullable = false)
     private Boolean pinned;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     private String title;
 
     @ManyToMany(fetch = FetchType.LAZY)
