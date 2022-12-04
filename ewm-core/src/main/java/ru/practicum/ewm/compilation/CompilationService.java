@@ -82,12 +82,14 @@ public class CompilationService {
     public void pin(Long compilationId) {
         Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(() -> new NotFoundException("Не найдено"));
         compilation.setPinned(true);
+        compilationRepository.save(compilation);
     }
 
     @Transactional
     public void unpin(Long compilationId) {
         Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(() -> new NotFoundException("Не найдено"));
         compilation.setPinned(false);
+        compilationRepository.save(compilation);
     }
 
     public List<CompilationOutputDto> getCompilations(Boolean pinned, Integer from, Integer size) {
