@@ -2,16 +2,14 @@ package ru.practicum.ewm.event;
 
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.user.User;
+import ru.practicum.ewm.util.DTFormat;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class EventMapper {
 
-    public static final DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     public static LocalDateTime parseDate(String date) {
-        return LocalDateTime.parse(date, dtFormat);
+        return LocalDateTime.parse(date, DTFormat.format);
     }
 
     public static Event getFromDto(EventCreateDto dto, User user, Category category, EventState state) {
@@ -42,16 +40,16 @@ public class EventMapper {
                 savedEvent.getInitiator().getId(),
                 savedEvent.getInitiator().getName());
 
-        String createdOn = savedEvent.getTimestamp().format(dtFormat);
+        String createdOn = savedEvent.getTimestamp().format(DTFormat.format);
         String publishedOn = null == savedEvent.getPublishedOn()
                 ? ""
-                : savedEvent.getPublishedOn().format(dtFormat);
+                : savedEvent.getPublishedOn().format(DTFormat.format);
 
         return EventOutputDto.builder()
                 .id(savedEvent.getId())
                 .annotation(savedEvent.getAnnotation())
                 .description(savedEvent.getDescription())
-                .eventDate(savedEvent.getEventDate().format(dtFormat))
+                .eventDate(savedEvent.getEventDate().format(DTFormat.format))
                 .category(category)
                 .initiator(initiator)
                 .title(savedEvent.getTitle())

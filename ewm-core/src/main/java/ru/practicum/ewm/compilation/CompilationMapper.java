@@ -2,16 +2,14 @@ package ru.practicum.ewm.compilation;
 
 import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.user.User;
+import ru.practicum.ewm.util.DTFormat;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CompilationMapper {
-
-    public static final DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static CompilationOutputDto toDto(Compilation compilation,
                                              List<Request> confirmedRequests,
@@ -37,7 +35,7 @@ public class CompilationMapper {
                                     .builder()
                                     .id(event.getId())
                                     .initiator(initiator)
-                                    .eventDate(event.getEventDate().format(dtFormat))
+                                    .eventDate(event.getEventDate().format(DTFormat.format))
                                     .title(event.getTitle())
                                     .paid(event.getPaid())
                                     .views(eventViews.getOrDefault(event.getId(), 0))

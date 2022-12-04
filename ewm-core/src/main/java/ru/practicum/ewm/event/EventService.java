@@ -13,9 +13,10 @@ import ru.practicum.ewm.controller.public_api.PublicEventsController;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.request.*;
-import ru.practicum.ewm.statistic.client.StatisticService;
+import ru.practicum.ewm.statistic.client.ClientStatisticService;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
+import ru.practicum.ewm.util.DTFormat;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,7 +25,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,14 +37,14 @@ public class EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
-    private final StatisticService statisticService;
+    private final ClientStatisticService clientStatisticService;
     @PersistenceContext
     private final EntityManager em;
 
     @Transactional
     public EventOutputDto createEvent(EventCreateDto dto, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(NotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Не найдено"));
+        Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(() -> new NotFoundException("Не найдено"));
         Event event = EventMapper.getFromDto(dto, user, category, EventState.PENDING);
         validPublishDataThrowException(event);
         Event savedEvent = eventsRepository.save(event);
@@ -54,8 +54,8 @@ public class EventService {
 
     @Transactional
     public EventOutputDto editEvent(EventEditDto dto, Long userId) {
-        userRepository.findById(userId).orElseThrow(NotFoundException::new);
-        Event event = eventsRepository.findById(dto.getEventId()).orElseThrow(NotFoundException::new);
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Не найдено"));
+        Event event = eventsRepository.findById(dto.getEventId()).orElseThrow(() -> new NotFoundException("Не найдено"));
 
         Boolean stateIsOk = event.getState() == EventState.PENDING || event.getState() == EventState.CANCELED;
         if (!stateIsOk) {
@@ -72,7 +72,7 @@ public class EventService {
 
         Event savedEvent = eventsRepository.save(event);
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
                 .getOrDefault(event.getId(), 0);
 
@@ -88,13 +88,13 @@ public class EventService {
 
     @Transactional
     public EventOutputDto cancelEvent(Long userId, Long eventId) {
-        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         if (event.getState() != EventState.PENDING) {
             throw new ValidationException("Отменить можно только событие в состоянии ожидания модерации.");
         }
         event.setState(EventState.CANCELED);
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
                 .getOrDefault(event.getId(), 0);
 
@@ -102,9 +102,9 @@ public class EventService {
     }
 
     public EventOutputDto getEvent(Long eventId, Long userId) {
-        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() -> new NotFoundException("Не найдено"));
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
                 .getOrDefault(event.getId(), 0);
 
@@ -112,7 +112,7 @@ public class EventService {
     }
 
     public List<RequestDto> getRequests(Long userId, Long eventId) {
-        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         List<Request> requests = requestRepository.findAllByEventId(event.getId());
 
         return requests
@@ -123,9 +123,9 @@ public class EventService {
 
     @Transactional
     public RequestDto confirmRequest(Long userId, Long eventId, Long requestId) {
-        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         Request request = requestRepository.findByIdAndEventId(requestId, eventId)
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("Не найдено"));
         Integer participantsCount = requestRepository.countByIdAndStatus(eventId, RequestStatus.CONFIRMED);
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             throw new ValidationException("если для события лимит заявок равен 0 или отключена пре-модерация заявок," +
@@ -149,9 +149,9 @@ public class EventService {
 
     @Transactional
     public RequestDto rejectRequest(Long userId, Long eventId, Long requestId) {
-        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findByIdAndInitiatorId(eventId, userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         Request request = requestRepository.findByIdAndEventId(requestId, event.getId())
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("Не найдено"));
         request.setStatus(RequestStatus.REJECTED);
 
         return RequestMapper.toDto(request);
@@ -159,7 +159,7 @@ public class EventService {
 
     @Transactional
     public EventOutputDto publishEvent(Long eventId) {
-        Event event = eventsRepository.findById(eventId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Не найдено"));
         if (event.getState() != EventState.PENDING) {
             throw new ValidationException("событие должно быть в состоянии ожидания публикации");
         }
@@ -171,7 +171,7 @@ public class EventService {
             throw new ValidationException("дата начала события должна быть не ранее чем за час от даты публикации");
         }
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(eventId), getMinDateByIds(List.of(eventId)))
                 .getOrDefault(eventId, 0);
 
@@ -180,14 +180,14 @@ public class EventService {
 
     @Transactional
     public EventOutputDto rejectEvent(Long eventId) {
-        Event event = eventsRepository.findById(eventId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Не найдено"));
         if (event.getState() == EventState.PUBLISHED) {
             throw new ValidationException("событие не должно быть опубликовано");
         }
 
         event.setState(EventState.CANCELED);
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(eventId), getMinDateByIds(List.of(eventId)))
                 .getOrDefault(eventId, 0);
 
@@ -196,11 +196,11 @@ public class EventService {
 
     @Transactional
     public EventOutputDto editEventByAdmin(EventEditDto dto, Long eventId) {
-        Event event = eventsRepository.findById(eventId).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Не найдено"));
         fillEventFromDto(event, dto);
         Event savedEvent = eventsRepository.save(event);
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(event.getId()), getMinDateByIds(List.of(event.getId())))
                 .getOrDefault(event.getId(), 0);
 
@@ -259,7 +259,7 @@ public class EventService {
 
     public List<EventOutputDto> searchPublicEvents(PublicEventsController.PublicEventsSearchParameters searchParams, String ip, String uri) {
 
-        statisticService.saveHit(uri, ip);
+        clientStatisticService.saveHit(uri, ip);
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
@@ -323,7 +323,7 @@ public class EventService {
         List<Request> confirmedRequests = requestRepository
                 .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
 
-        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds,
+        Map<Long, Integer> eventsViews = clientStatisticService.getEventViews(eventIds,
                 getMinDateByIds(eventIds));
 
         return
@@ -348,12 +348,12 @@ public class EventService {
                         .collect(Collectors.toList());
     }
 
-    public EventOutputDto findById(Long id, String ip) {
-        statisticService.saveHit("/events/" + id, ip);
+    public EventOutputDto getById(Long id, String ip) {
+        clientStatisticService.saveHit("/events/" + id, ip);
 
-        Event event = eventsRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(NotFoundException::new);
+        Event event = eventsRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(() -> new NotFoundException("Не найдено"));
 
-        Integer views = statisticService
+        Integer views = clientStatisticService
                 .getEventViews(List.of(id), getMinDateByIds(List.of(id)))
                 .getOrDefault(id, 0);
 
@@ -361,7 +361,6 @@ public class EventService {
     }
 
     public String getMinDateByIds(List<Long> eventIds) {
-        DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Optional<LocalDateTime> minDate = eventsRepository
                 .findAllById(eventIds)
                 .stream()
@@ -369,10 +368,10 @@ public class EventService {
                 .min(LocalDateTime::compareTo);
         if (minDate.isEmpty()) {
 
-            return LocalDateTime.now().format(dtFormat);
+            return LocalDateTime.now().format(DTFormat.format);
         }
 
-        return minDate.get().format(dtFormat);
+        return minDate.get().format(DTFormat.format);
     }
 
     private List<EventOutputDto> getEventsOutputDto(Stream<Event> stream, Stream<Event> eventStream) {
@@ -383,7 +382,7 @@ public class EventService {
         List<Request> confirmedRequests = requestRepository
                 .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
 
-        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds,
+        Map<Long, Integer> eventsViews = clientStatisticService.getEventViews(eventIds,
                 getMinDateByIds(eventIds));
 
         return
@@ -414,7 +413,7 @@ public class EventService {
             event.setDescription(dto.getDescription());
         }
         if (null != dto.getCategory()) {
-            Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(NotFoundException::new);
+            Category category = categoryRepository.findById(dto.getCategory()).orElseThrow(() -> new NotFoundException("Не найдено"));
             event.setCategory(category);
         }
         if (null != dto.getEventDate()) {

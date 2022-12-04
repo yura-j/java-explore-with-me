@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.compilation.CompilationInputDto;
 import ru.practicum.ewm.compilation.CompilationOutputDto;
 import ru.practicum.ewm.compilation.CompilationService;
-import ru.practicum.ewm.marker.Base;
+import ru.practicum.ewm.util.marker.Base;
 
 @RestController
 @RequiredArgsConstructor

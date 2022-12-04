@@ -8,9 +8,9 @@ import ru.practicum.ewm.event.EventEditDto;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.EventState;
+import ru.practicum.ewm.util.DTFormat;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -90,9 +90,8 @@ public class AdminEventsController {
         if (null == dateParameter) {
             return null;
         }
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        return LocalDateTime.parse(dateParameter, format);
+        return LocalDateTime.parse(dateParameter, DTFormat.format);
     }
 
     private EventState parseState(String s) {

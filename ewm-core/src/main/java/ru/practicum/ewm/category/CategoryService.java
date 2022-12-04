@@ -16,15 +16,9 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     public CategoryDtoWithId create(CategoryDto dto) {
-        Category category = Category.builder()
-                .name(dto.getName())
-                .build();
-        Category savedCategory = categoryRepository.save(category);
+        Category category = CategoryDtoMapper.fromDto(dto);
 
-        return CategoryDtoWithId.builder()
-                .id(savedCategory.getId())
-                .name(savedCategory.getName())
-                .build();
+        return CategoryDtoMapper.toDto(categoryRepository.save(category));
     }
 
     public void delete(Long categoryId) {
@@ -32,26 +26,29 @@ public class CategoryService {
     }
 
     public CategoryDtoWithId edit(CategoryDtoWithId dto) {
-        Category category = categoryRepository.findById(dto.getId()).orElseThrow(NotFoundException::new);
+        Category category = categoryRepository
+                .findById(dto.getId())
+                .orElseThrow(() -> new NotFoundException("Категория не найдена"));
         category.setName(dto.getName());
-        Category savedCategory = categoryRepository.save(category);
 
-        return CategoryDtoMapper.fromCategory(savedCategory);
+        return CategoryDtoMapper.toDto(categoryRepository.save(category));
     }
 
-    public List<CategoryDtoWithId> find(Integer from, Integer size) {
+    public List<CategoryDtoWithId> get(Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<Category> categories = categoryRepository.findAll(page);
 
         return categories
                 .stream()
-                .map(CategoryDtoMapper::fromCategory)
+                .map(CategoryDtoMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public CategoryDtoWithId findById(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(NotFoundException::new);
+    public CategoryDtoWithId getById(Long categoryId) {
+        Category category = categoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Категория не найдена"));
 
-        return CategoryDtoMapper.fromCategory(category);
+        return CategoryDtoMapper.toDto(category);
     }
 }

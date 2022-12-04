@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.CategoryDto;
 import ru.practicum.ewm.category.CategoryDtoWithId;
 import ru.practicum.ewm.category.CategoryService;
-import ru.practicum.ewm.marker.Base;
+import ru.practicum.ewm.util.marker.Base;
 
 @RestController
 @RequiredArgsConstructor

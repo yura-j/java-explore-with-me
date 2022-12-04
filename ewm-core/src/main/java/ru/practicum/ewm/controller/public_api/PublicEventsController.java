@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.exception.ValidationException;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
+import ru.practicum.ewm.util.DTFormat;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ public class PublicEventsController {
     ) {
         log.info("Запрошено событие");
         String ip = request.getRemoteAddr();
-        return eventService.findById(id, ip);
+        return eventService.getById(id, ip);
     }
 
     @GetMapping
@@ -84,9 +84,8 @@ public class PublicEventsController {
         if (null == dateParameter) {
             return null;
         }
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        return LocalDateTime.parse(dateParameter, format);
+        return LocalDateTime.parse(dateParameter, DTFormat.format);
     }
 
     public enum SortEventsParam {

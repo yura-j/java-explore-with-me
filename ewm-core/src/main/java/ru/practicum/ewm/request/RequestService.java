@@ -34,8 +34,8 @@ public class RequestService {
 
     @Transactional
     public RequestDto createRequest(Long userId, Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(NotFoundException::new);
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Не найдено"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         Boolean isAlreadyExists = requestRepository.findByRequesterIdAndEventId(userId, eventId).isPresent();
         if (isAlreadyExists) {
             throw new ValidationException("нельзя добавить повторный запрос");
@@ -72,7 +72,7 @@ public class RequestService {
 
     @Transactional
     public RequestDto cancelRequest(Long userId, Long requestId) {
-        Request request = requestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(NotFoundException::new);
+        Request request = requestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(() -> new NotFoundException("Не найдено"));
         request.setStatus(RequestStatus.CANCELED);
 
         return RequestMapper.toDto(request);

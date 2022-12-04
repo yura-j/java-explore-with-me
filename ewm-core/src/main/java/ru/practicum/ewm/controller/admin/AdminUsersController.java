@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.marker.Base;
+import ru.practicum.ewm.util.marker.Base;
 import ru.practicum.ewm.user.UserDto;
 import ru.practicum.ewm.user.UserService;
 

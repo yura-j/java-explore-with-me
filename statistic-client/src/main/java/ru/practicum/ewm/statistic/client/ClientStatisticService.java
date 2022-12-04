@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class StatisticService {
+public class ClientStatisticService {
 
     private static final String APP = "EWM";
     private final WebClient wc;
@@ -45,12 +45,12 @@ public class StatisticService {
 
     public Map<Long, Integer> getEventViews(List<Long> eventIds, String start) {
         Map<Long, Integer> eventViews = new HashMap<>();
-        DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         List<String> uris = eventIds
                 .stream()
                 .map(id -> UriUtils.encode("/events/" + id, StandardCharsets.UTF_8))
                 .collect(Collectors.toList());
         try {
+            DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             StatisticDto[] statistic =
                     wc.get()
                             .uri(uriBuilder -> uriBuilder

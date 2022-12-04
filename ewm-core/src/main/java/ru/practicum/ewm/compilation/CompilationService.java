@@ -11,7 +11,7 @@ import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.request.RequestStatus;
-import ru.practicum.ewm.statistic.client.StatisticService;
+import ru.practicum.ewm.statistic.client.ClientStatisticService;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class CompilationService {
     private final EventService eventService;
 
     private final EntityManager em;
-    private final StatisticService statisticService;
+    private final ClientStatisticService clientStatisticService;
 
     @Transactional
     public CompilationOutputDto create(CompilationInputDto dto) {
@@ -52,12 +52,12 @@ public class CompilationService {
         em.clear();
 
 
-        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
+        Map<Long, Integer> eventsViews = clientStatisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return CompilationMapper.toDto(
                 compilationRepository
                         .findById(compilation.getId())
-                        .orElseThrow(NotFoundException::new),
+                        .orElseThrow(() -> new NotFoundException("Не найдено")),
                 confirmedRequests,
                 eventsViews
         );
@@ -80,13 +80,13 @@ public class CompilationService {
 
     @Transactional
     public void pin(Long compilationId) {
-        Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(NotFoundException::new);
+        Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(() -> new NotFoundException("Не найдено"));
         compilation.setPinned(true);
     }
 
     @Transactional
     public void unpin(Long compilationId) {
-        Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(NotFoundException::new);
+        Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(() -> new NotFoundException("Не найдено"));
         compilation.setPinned(false);
     }
 
@@ -128,7 +128,7 @@ public class CompilationService {
         List<Long> eventIds = getEventsIdsByCompilationIds(compilationIds);
         List<Request> confirmedRequests = requestRepository
                 .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
-        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
+        Map<Long, Integer> eventsViews = clientStatisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return compilations
                 .stream()
@@ -137,17 +137,17 @@ public class CompilationService {
     }
 
     public CompilationOutputDto get(Long compilationId) {
-        Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(NotFoundException::new);
+        Compilation compilation = compilationRepository.findById(compilationId).orElseThrow(() -> new NotFoundException("Не найдено"));
         List<Long> eventIds = getEventsIdsByCompilationIds(List.of(compilation.getId()));
         List<Request> confirmedRequests = requestRepository
                 .findAllByStatusAndEventIdIn(RequestStatus.CONFIRMED, eventIds);
 
-        Map<Long, Integer> eventsViews = statisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
+        Map<Long, Integer> eventsViews = clientStatisticService.getEventViews(eventIds, eventService.getMinDateByIds(eventIds));
 
         return CompilationMapper.toDto(
                 compilationRepository
                         .findById(compilation.getId())
-                        .orElseThrow(NotFoundException::new),
+                        .orElseThrow(() -> new NotFoundException("Не найдено")),
                 confirmedRequests,
                 eventsViews
         );

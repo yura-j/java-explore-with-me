@@ -8,7 +8,7 @@ import ru.practicum.ewm.event.EventCreateDto;
 import ru.practicum.ewm.event.EventEditDto;
 import ru.practicum.ewm.event.EventOutputDto;
 import ru.practicum.ewm.event.EventService;
-import ru.practicum.ewm.marker.Base;
+import ru.practicum.ewm.util.marker.Base;
 import ru.practicum.ewm.request.RequestDto;
 
 import java.util.List;

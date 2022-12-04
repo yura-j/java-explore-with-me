@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriUtils;
+import ru.practicum.ewm.statistic.util.DTFormat;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -33,9 +34,9 @@ public class StatisticController {
                 .map(uri -> UriUtils.decode(uri, StandardCharsets.UTF_8))
                 .collect(Collectors.toList());
 
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse(start, df);
-        LocalDateTime endTime = LocalDateTime.parse(end, df);
+
+        LocalDateTime startTime = LocalDateTime.parse(start, DTFormat.format);
+        LocalDateTime endTime = LocalDateTime.parse(end, DTFormat.format);
 
         return service.getStatistic(startTime, endTime, unique, urisDecoded);
     }
