@@ -45,9 +45,11 @@ public class PublicEventsController {
             HttpServletRequest request
     ) {
         log.info("Поиск события");
-        SortEventsParam sort = null == sortParam
-                ? null
-                : parseSort(sortParam);
+        SortEventsParam sort = null;
+        if (sortParam != null) {
+            sort = parseSort(sortParam);
+        }
+
         if (from < 0 || size < 0) {
             throw new ValidationException("Параметры from или size должны быть положительны");
         }

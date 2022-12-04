@@ -19,9 +19,7 @@ public class UserService {
 
     public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<User> users = (null != ids)
-                ? userStorage.findAllByIdIn(ids, page)
-                : userStorage.findAll(page);
+        Page<User> users = (null != ids) ? userStorage.findAllByIdIn(ids, page) : userStorage.findAll(page);
 
         return users
                 .stream()

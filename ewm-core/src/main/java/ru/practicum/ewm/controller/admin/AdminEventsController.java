@@ -62,12 +62,16 @@ public class AdminEventsController {
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         log.info("Запрошены события");
-        List<EventState> states = null == statesParameter
-                ? null
-                : statesParameter
-                .stream()
-                .map(this::parseState)
-                .collect(Collectors.toList());
+        List<EventState> states;
+        if (null == statesParameter) {
+            states = null;
+        } else {
+            states = statesParameter
+                    .stream()
+                    .map(this::parseState)
+                    .collect(Collectors.toList());
+        }
+
         if (from < 0 || size < 0) {
             throw new ValidationException("Параметры from или size должны быть положительны");
         }

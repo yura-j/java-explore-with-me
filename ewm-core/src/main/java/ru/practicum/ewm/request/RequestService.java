@@ -49,9 +49,7 @@ public class RequestService {
             throw new ValidationException("нельзя участвовать в неопубликованном событии");
         }
 
-        RequestStatus status = event.getRequestModeration()
-                ? RequestStatus.PENDING
-                : RequestStatus.CONFIRMED;
+        RequestStatus status = event.getRequestModeration() ? RequestStatus.PENDING : RequestStatus.CONFIRMED;
 
         Request request = Request
                 .builder()

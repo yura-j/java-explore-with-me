@@ -4,6 +4,7 @@ import ru.practicum.ewm.request.Request;
 import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.util.DTFormat;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,38 +15,38 @@ public class CompilationMapper {
     public static CompilationOutputDto toDto(Compilation compilation,
                                              List<Request> confirmedRequests,
                                              Map<Long, Integer> eventViews) {
-        List<CompilationOutputDto.Event> events = null == compilation.getEvents()
-                ? List.of()
-                : compilation.getEvents()
-                .stream()
-                .map(event -> {
-                            User userInitiator = event.getInitiator();
-                            CompilationOutputDto.Initiator initiator = new CompilationOutputDto.Initiator(
-                                    userInitiator.getId(),
-                                    userInitiator.getName());
-                            CompilationOutputDto.Category category = new CompilationOutputDto.Category(
-                                    event.getCategory().getId(),
-                                    event.getCategory().getName()
-                            );
-                            Integer confirmedCount = Math.toIntExact(confirmedRequests
-                                    .stream()
-                                    .filter(request -> Objects.equals(request.getEventId(), event.getId()))
-                                    .count());
-                            return CompilationOutputDto.Event
-                                    .builder()
-                                    .id(event.getId())
-                                    .initiator(initiator)
-                                    .eventDate(event.getEventDate().format(DTFormat.format))
-                                    .title(event.getTitle())
-                                    .paid(event.getPaid())
-                                    .views(eventViews.getOrDefault(event.getId(), 0))
-                                    .annotation(event.getAnnotation())
-                                    .category(category)
-                                    .confirmedRequests(confirmedCount)
-                                    .build();
-                        }
-                ).collect(Collectors.toList());
-
+        List<CompilationOutputDto.Event> events = new ArrayList<>();
+        if (null != compilation.getEvents()) {
+            events = compilation.getEvents()
+                    .stream()
+                    .map(event -> {
+                                User userInitiator = event.getInitiator();
+                                CompilationOutputDto.Initiator initiator = new CompilationOutputDto.Initiator(
+                                        userInitiator.getId(),
+                                        userInitiator.getName());
+                                CompilationOutputDto.Category category = new CompilationOutputDto.Category(
+                                        event.getCategory().getId(),
+                                        event.getCategory().getName()
+                                );
+                                Integer confirmedCount = Math.toIntExact(confirmedRequests
+                                        .stream()
+                                        .filter(request -> Objects.equals(request.getEventId(), event.getId()))
+                                        .count());
+                                return CompilationOutputDto.Event
+                                        .builder()
+                                        .id(event.getId())
+                                        .initiator(initiator)
+                                        .eventDate(event.getEventDate().format(DTFormat.format))
+                                        .title(event.getTitle())
+                                        .paid(event.getPaid())
+                                        .views(eventViews.getOrDefault(event.getId(), 0))
+                                        .annotation(event.getAnnotation())
+                                        .category(category)
+                                        .confirmedRequests(confirmedCount)
+                                        .build();
+                            }
+                    ).collect(Collectors.toList());
+        }
         return CompilationOutputDto
                 .builder()
                 .id(compilation.getId())

@@ -8,7 +8,7 @@ import ru.practicum.ewm.statistic.util.DTFormat;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,13 +27,13 @@ public class StatisticController {
             @RequestParam(required = false) List<String> uris
     ) {
         log.info("get stats, start:{}, end:{}", start, end);
-        List<String> urisDecoded = null == uris
-                ? List.of()
-                : uris
-                .stream()
-                .map(uri -> UriUtils.decode(uri, StandardCharsets.UTF_8))
-                .collect(Collectors.toList());
-
+        List<String> urisDecoded = new ArrayList<>();
+        if (null != uris) {
+            urisDecoded = uris
+                    .stream()
+                    .map(uri -> UriUtils.decode(uri, StandardCharsets.UTF_8))
+                    .collect(Collectors.toList());
+        }
 
         LocalDateTime startTime = LocalDateTime.parse(start, DTFormat.format);
         LocalDateTime endTime = LocalDateTime.parse(end, DTFormat.format);

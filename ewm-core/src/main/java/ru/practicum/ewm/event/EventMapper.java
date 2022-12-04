@@ -41,9 +41,10 @@ public class EventMapper {
                 savedEvent.getInitiator().getName());
 
         String createdOn = savedEvent.getTimestamp().format(DTFormat.format);
-        String publishedOn = null == savedEvent.getPublishedOn()
-                ? ""
-                : savedEvent.getPublishedOn().format(DTFormat.format);
+        String publishedOn = "";
+        if (null != savedEvent.getPublishedOn()){
+            publishedOn = savedEvent.getPublishedOn().format(DTFormat.format);
+        }
 
         return EventOutputDto.builder()
                 .id(savedEvent.getId())

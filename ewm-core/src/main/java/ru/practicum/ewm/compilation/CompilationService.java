@@ -117,9 +117,12 @@ public class CompilationService {
 
     public List<CompilationOutputDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         PageRequest page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Compilation> compilations = null == pinned
-                ? compilationRepository.findAll(page)
-                : compilationRepository.findAllByPinned(pinned, page);
+        Page<Compilation> compilations;
+        if (null == pinned) {
+            compilations = compilationRepository.findAll(page);
+        } else {
+            compilations = compilationRepository.findAllByPinned(pinned, page);
+        }
         List<Long> compilationIds =
                 compilations
                         .stream()
