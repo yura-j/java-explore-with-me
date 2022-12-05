@@ -10,14 +10,14 @@ import lombok.*;
 public class EventOutputDto {
 
     private String annotation;
-    private CategoryDto categoryDto;
+    private CategoryDto category;
     private Integer confirmedRequests;
     private String description;
     private String createdOn;
     private String eventDate;
     private Long id;
-    private InitiatorDto initiatorDto;
-    private LocationDto locationDto;
+    private InitiatorDto initiator;
+    private LocationDto location;
     private Boolean paid;
     private Integer participantLimit;
     private String publishedOn;
