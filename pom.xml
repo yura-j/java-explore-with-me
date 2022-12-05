@@ -22,6 +22,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<modules>
+		<module>statistic</module>
+		<module>ewm-core</module>
+		<module>statistic-client</module>
+	</modules>
+
 	<build>
 		<pluginManagement>
 			<plugins>
