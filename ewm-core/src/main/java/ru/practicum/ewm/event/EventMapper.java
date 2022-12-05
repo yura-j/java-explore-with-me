@@ -5,6 +5,8 @@ import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.util.DTFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class EventMapper {
 
@@ -33,6 +35,20 @@ public class EventMapper {
         EventOutputDto.LocationDto locationDto = new EventOutputDto.LocationDto(savedEvent.getLat(),
                 savedEvent.getLon());
 
+
+        List<EventOutputDto.CommentDto> comments = null == savedEvent.getComments()
+                ? List.of()
+                : savedEvent.getComments()
+                .stream()
+                .map(c -> new EventOutputDto.CommentDto(
+                        c.getId(),
+                        c.getAuthor(),
+                        c.getDtUpdate().toString(),
+                        c.getDtCreate().toString(),
+                        c.getText())
+                )
+                .collect(Collectors.toList());
+
         EventOutputDto.CategoryDto categoryDto = new EventOutputDto.CategoryDto(
                 savedEvent.getCategory().getId(),
                 savedEvent.getCategory().getName());
@@ -55,6 +71,7 @@ public class EventMapper {
                 .initiator(initiatorDto)
                 .title(savedEvent.getTitle())
                 .location(locationDto)
+                .comments(comments)
                 .createdOn(createdOn)
                 .publishedOn(publishedOn)
                 .confirmedRequests(confirmedRequests)
