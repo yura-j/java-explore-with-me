@@ -1,8 +1,10 @@
-package ru.practicum.ewm.comment;
+package ru.practicum.ewm.controller.private_api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.comment.CommentOutputDto;
+import ru.practicum.ewm.comment.CommentService;
 
 @Slf4j
 @RestController
