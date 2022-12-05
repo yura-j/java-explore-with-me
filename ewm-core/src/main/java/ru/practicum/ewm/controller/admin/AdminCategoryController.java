@@ -28,7 +28,8 @@ public class AdminCategoryController {
 
     @PatchMapping
     public CategoryDtoWithId editCategory(
-            @RequestBody CategoryDtoWithId dto) {
+            @RequestBody CategoryDtoWithId dto
+    ) {
         log.info("Отредактирована категория");
 
         return categoryService.edit(dto);
