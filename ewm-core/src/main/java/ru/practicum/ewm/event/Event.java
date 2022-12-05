@@ -2,11 +2,14 @@ package ru.practicum.ewm.event;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Where;
 import ru.practicum.ewm.category.Category;
+import ru.practicum.ewm.comment.Comment;
 import ru.practicum.ewm.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -46,6 +49,11 @@ public class Event {
     private Integer participantLimit;
     @Column(nullable = false)
     private Boolean requestModeration;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "event_id")
+    @Where(clause = "parent_id IS NULL")
+    private List<Comment> comments;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
