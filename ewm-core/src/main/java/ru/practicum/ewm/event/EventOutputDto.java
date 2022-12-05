@@ -10,14 +10,14 @@ import lombok.*;
 public class EventOutputDto {
 
     private String annotation;
-    private Category category;
+    private CategoryDto categoryDto;
     private Integer confirmedRequests;
     private String description;
     private String createdOn;
     private String eventDate;
     private Long id;
-    private Initiator initiator;
-    private Location location;
+    private InitiatorDto initiatorDto;
+    private LocationDto locationDto;
     private Boolean paid;
     private Integer participantLimit;
     private String publishedOn;
@@ -29,7 +29,7 @@ public class EventOutputDto {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Category {
+    public static class CategoryDto {
         private Long id;
         private String name;
     }
@@ -37,7 +37,7 @@ public class EventOutputDto {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Initiator {
+    public static class InitiatorDto {
         private Long id;
         private String name;
     }
@@ -45,7 +45,7 @@ public class EventOutputDto {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Location {
+    public static class LocationDto {
         private Float lat;
         private Float lon;
     }

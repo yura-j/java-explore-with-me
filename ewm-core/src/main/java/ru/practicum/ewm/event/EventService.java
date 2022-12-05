@@ -422,12 +422,12 @@ public class EventService {
         if (null != dto.getPaid()) {
             event.setPaid(dto.getPaid());
         }
-        if (null != dto.getLocation()
-                && null != dto.getLocation().getLat()
-                && null != dto.getLocation().getLon()
+        if (null != dto.getLocationDto()
+                && null != dto.getLocationDto().getLat()
+                && null != dto.getLocationDto().getLon()
         ) {
-            event.setLat(dto.getLocation().getLat());
-            event.setLon(dto.getLocation().getLon());
+            event.setLat(dto.getLocationDto().getLat());
+            event.setLon(dto.getLocationDto().getLon());
         }
 
         if (null != dto.getParticipantLimit()) {

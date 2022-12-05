@@ -15,16 +15,16 @@ public class CompilationMapper {
     public static CompilationOutputDto toDto(Compilation compilation,
                                              List<Request> confirmedRequests,
                                              Map<Long, Integer> eventViews) {
-        List<CompilationOutputDto.Event> events = new ArrayList<>();
+        List<CompilationOutputDto.EventDto> events = new ArrayList<>();
         if (null != compilation.getEvents()) {
             events = compilation.getEvents()
                     .stream()
                     .map(event -> {
                                 User userInitiator = event.getInitiator();
-                                CompilationOutputDto.Initiator initiator = new CompilationOutputDto.Initiator(
+                                CompilationOutputDto.InitiatorDto initiatorDto = new CompilationOutputDto.InitiatorDto(
                                         userInitiator.getId(),
                                         userInitiator.getName());
-                                CompilationOutputDto.Category category = new CompilationOutputDto.Category(
+                                CompilationOutputDto.CategoryDto categoryDto = new CompilationOutputDto.CategoryDto(
                                         event.getCategory().getId(),
                                         event.getCategory().getName()
                                 );
@@ -32,16 +32,16 @@ public class CompilationMapper {
                                         .stream()
                                         .filter(request -> Objects.equals(request.getEventId(), event.getId()))
                                         .count());
-                                return CompilationOutputDto.Event
+                                return CompilationOutputDto.EventDto
                                         .builder()
                                         .id(event.getId())
-                                        .initiator(initiator)
+                                        .initiatorDto(initiatorDto)
                                         .eventDate(event.getEventDate().format(DTFormat.format))
                                         .title(event.getTitle())
                                         .paid(event.getPaid())
                                         .views(eventViews.getOrDefault(event.getId(), 0))
                                         .annotation(event.getAnnotation())
-                                        .category(category)
+                                        .categoryDto(categoryDto)
                                         .confirmedRequests(confirmedCount)
                                         .build();
                             }

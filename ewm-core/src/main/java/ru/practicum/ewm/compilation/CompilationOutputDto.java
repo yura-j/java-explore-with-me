@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CompilationOutputDto {
 
-    private List<Event> events;
+    private List<EventDto> events;
     private Long id;
     private String title;
     private Boolean pinned;
@@ -19,7 +19,7 @@ public class CompilationOutputDto {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Category {
+    public static class CategoryDto {
         private Long id;
         private String name;
     }
@@ -27,7 +27,7 @@ public class CompilationOutputDto {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Initiator {
+    public static class InitiatorDto {
         private Long id;
         private String name;
     }
@@ -36,13 +36,13 @@ public class CompilationOutputDto {
     @Setter
     @Builder
     @AllArgsConstructor
-    public static class Event {
+    public static class EventDto {
         private String annotation;
-        private Category category;
+        private CategoryDto categoryDto;
         private Integer confirmedRequests;
         private String eventDate;
         private Long id;
-        private Initiator initiator;
+        private InitiatorDto initiatorDto;
         private Boolean paid;
         private String title;
         private Integer views;

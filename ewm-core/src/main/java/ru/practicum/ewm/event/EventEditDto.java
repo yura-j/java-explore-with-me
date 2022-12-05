@@ -15,7 +15,7 @@ public class EventEditDto {
     private String description;
     private Integer confirmedRequests;
     private String eventDate;
-    private Location location;
+    private LocationDto locationDto;
     private Boolean paid;
     private Integer participantLimit;
     private Boolean requestModeration;
@@ -24,7 +24,7 @@ public class EventEditDto {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class Location {
+    public static class LocationDto {
         private Float lon;
         private Float lat;
     }

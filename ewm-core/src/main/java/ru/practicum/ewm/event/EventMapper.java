@@ -14,8 +14,8 @@ public class EventMapper {
 
     public static Event getFromDto(EventCreateDto dto, User user, Category category, EventState state) {
         return Event.builder()
-                .lat(dto.getLocation().getLat())
-                .lon(dto.getLocation().getLon())
+                .lat(dto.getLocationDto().getLat())
+                .lon(dto.getLocationDto().getLon())
                 .description(dto.getDescription())
                 .annotation(dto.getAnnotation())
                 .title(dto.getTitle())
@@ -30,13 +30,13 @@ public class EventMapper {
     }
 
     public static EventOutputDto toDto(Event savedEvent, Integer confirmedRequests, Integer views) {
-        EventOutputDto.Location location = new EventOutputDto.Location(savedEvent.getLat(),
+        EventOutputDto.LocationDto locationDto = new EventOutputDto.LocationDto(savedEvent.getLat(),
                 savedEvent.getLon());
 
-        EventOutputDto.Category category = new EventOutputDto.Category(
+        EventOutputDto.CategoryDto categoryDto = new EventOutputDto.CategoryDto(
                 savedEvent.getCategory().getId(),
                 savedEvent.getCategory().getName());
-        EventOutputDto.Initiator initiator = new EventOutputDto.Initiator(
+        EventOutputDto.InitiatorDto initiatorDto = new EventOutputDto.InitiatorDto(
                 savedEvent.getInitiator().getId(),
                 savedEvent.getInitiator().getName());
 
@@ -51,10 +51,10 @@ public class EventMapper {
                 .annotation(savedEvent.getAnnotation())
                 .description(savedEvent.getDescription())
                 .eventDate(savedEvent.getEventDate().format(DTFormat.format))
-                .category(category)
-                .initiator(initiator)
+                .categoryDto(categoryDto)
+                .initiatorDto(initiatorDto)
                 .title(savedEvent.getTitle())
-                .location(location)
+                .locationDto(locationDto)
                 .createdOn(createdOn)
                 .publishedOn(publishedOn)
                 .confirmedRequests(confirmedRequests)
